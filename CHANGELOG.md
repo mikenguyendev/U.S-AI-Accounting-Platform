@@ -6,6 +6,37 @@ Format dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), và
 
 ---
 
+## [1.1.0] — 2026-04-23
+
+**📚 Multi-language docs + beginner-friendly QUICKSTART guide.** No template code changes — pure documentation release so non-technical users in Vietnamese and Spanish-speaking markets can onboard without needing English fluency.
+
+### Added — User-facing docs (3 languages)
+- `QUICKSTART.md` (EN), `QUICKSTART.vi.md` (VN), `QUICKSTART.es.md` (ES) — Detailed walkthrough for non-technical users:
+  - Part 1: First-time setup in 10 minutes (6 step-by-step screens)
+  - Part 2: How to talk to AI — golden rule + copy-paste prompt templates
+  - Part 3: 5 daily case studies with exact prompts (vendor invoice, expense receipt, customer invoice, monthly close, new employee hire)
+  - Part 4: FAQ / troubleshooting (7 common issues)
+  - Part 5: Where to get help (CPA vs template vs developer scope)
+  - First Week Checklist + 5 tips for non-IT users
+- `README.vi.md` (VN), `README.es.md` (ES) — Localized project overviews with 3-path quickstart (new business / fractional CFO / customer delivery) + AI agent compatibility notes + docs table with prominent QUICKSTART links
+- Updated root `README.md` — language selector at top (🇬🇧 • 🇻🇳 • 🇪🇸), prominent QUICKSTART call-out for newcomers, refreshed docs table showing all language variants by audience (non-technical users / developers / AI agents)
+
+### Added — Privacy protection
+- `.gitignore` — comprehensive exclusion of customer data:
+  - `_INSTANCES/*/` (per-customer workspaces, contain PII)
+  - `_DELIVERIES/` (zipped customer packages)
+  - `_DEPRECATED_pre_template/` (legacy pre-refactor customer data)
+  - `_CONFIG/_BUSINESS_CONFIG.json` (plain, non-example config)
+  - Standard excludes: OS junk, IDE files, Python/Node artifacts, secrets
+
+### Changed
+- Bumped `VERSION` file: 1.0.0 → 1.1.0
+
+### No code changes
+- Zero changes to `_MODULES/`, `_CORE/`, `_TEMPLATES/`, `_CONFIG/setup_wizard.html`, or HTML forms. Existing v1.0.0 instances need no migration — this is purely an additive documentation release.
+
+---
+
 ## [1.0.0] — 2026-04-23
 
 **🎉 Initial stable release.** Plug-and-play AI Accounting template cho US Small Business.
