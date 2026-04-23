@@ -1,12 +1,16 @@
 # 🏢 AI Accounting Controller — White-Label Template
 
-> **Plug-and-play AI Agent template cho US Small Business accounting workflow.**
-> Fill wizard → Get personalized workspace in 5 minutes → AI Agent đóng vai Corporate Controller cho công ty bạn.
+> **Plug-and-play AI Agent template for US Small Business accounting workflow.**
+> Fill wizard → Get personalized workspace in 5 minutes → AI Agent acts as Corporate Controller for your company.
 
 **Version:** 1.0.0 (stable)
 **Developer:** mikenguyen.dev@gmail.com
-**License:** Xem [LICENSE](LICENSE)
+**License:** See [LICENSE](LICENSE)
 **Status:** ✅ Production-ready. All 8 development phases complete. See [CHANGELOG.md](CHANGELOG.md) for what ships.
+
+**Languages:** 🇬🇧 English (this file) • 🇻🇳 [Tiếng Việt](README.vi.md) • 🇪🇸 [Español](README.es.md)
+
+**👉 New to this? Read [QUICKSTART.md](QUICKSTART.md) first** ([VN](QUICKSTART.vi.md) • [ES](QUICKSTART.es.md)) — **detailed guide for non-technical users** with daily case studies.
 
 ---
 
@@ -36,7 +40,12 @@ Reusable AI Accounting template that lets you deploy a **Corporate Accounting Co
 
 ```
 AI_Accounting_Controller/
-├── README.md                            ← Bạn đang đọc
+├── README.md                            ← You are reading this (EN)
+├── README.vi.md                         ← Vietnamese overview
+├── README.es.md                         ← Spanish overview
+├── QUICKSTART.md                        ← ⭐ Beginner walkthrough with case studies (EN)
+├── QUICKSTART.vi.md                     ← Vietnamese beginner guide
+├── QUICKSTART.es.md                     ← Spanish beginner guide
 ├── CHANGELOG.md                         ← Version history
 ├── CONTRIBUTING.md                      ← How to extend (states, entities, industries)
 ├── LICENSE                              ← Usage terms
@@ -194,16 +203,17 @@ Tested and recommended:
 
 ## 📚 Documentation
 
-| File | Purpose |
-|------|---------|
-| [README.md](README.md) | Project overview (this file) |
-| [CHANGELOG.md](CHANGELOG.md) | Version history + what ships in v1.0.0 |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | How to extend template (states, entities, industries) |
-| [_CONFIG/NEW_BUSINESS_ONBOARDING_PROTOCOL.md](_CONFIG/NEW_BUSINESS_ONBOARDING_PROTOCOL.md) | 7-step AI agent workflow |
-| [_CORE/RENDER_PROTOCOL.md](_CORE/RENDER_PROTOCOL.md) | 7-pass template resolution algorithm |
-| [_CONFIG/PLACEHOLDER_CONVENTION.md](_CONFIG/PLACEHOLDER_CONVENTION.md) | `{{PLACEHOLDER}}` syntax spec |
-| [_CONFIG/_BUSINESS_CONFIG.schema.json](_CONFIG/_BUSINESS_CONFIG.schema.json) | Config schema (JSON Schema draft-07) |
-| [_TEMPLATES/Excel/Index_workbook.md](_TEMPLATES/Excel/Index_workbook.md) | 10 Excel templates master index |
+| File | Purpose | Audience |
+|------|---------|----------|
+| **[QUICKSTART.md](QUICKSTART.md)** ([VN](QUICKSTART.vi.md) • [ES](QUICKSTART.es.md)) | **Beginner walkthrough with daily case studies** ⭐ | **Non-technical users** |
+| [README.md](README.md) ([VN](README.vi.md) • [ES](README.es.md)) | Project overview (this file) | Everyone |
+| [CHANGELOG.md](CHANGELOG.md) | Version history + what ships in v1.0.0 | Everyone |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | How to extend template (states, entities, industries) | Developers |
+| [_CONFIG/NEW_BUSINESS_ONBOARDING_PROTOCOL.md](_CONFIG/NEW_BUSINESS_ONBOARDING_PROTOCOL.md) | 7-step AI agent onboarding workflow | AI Agents |
+| [_CORE/RENDER_PROTOCOL.md](_CORE/RENDER_PROTOCOL.md) | 7-pass template resolution algorithm | AI Agents |
+| [_CONFIG/PLACEHOLDER_CONVENTION.md](_CONFIG/PLACEHOLDER_CONVENTION.md) | `{{PLACEHOLDER}}` syntax spec | Developers |
+| [_CONFIG/_BUSINESS_CONFIG.schema.json](_CONFIG/_BUSINESS_CONFIG.schema.json) | Config schema (JSON Schema draft-07) | Developers |
+| [_TEMPLATES/Excel/Index_workbook.md](_TEMPLATES/Excel/Index_workbook.md) | 10 Excel templates master index | Users + AI Agents |
 
 ---
 
