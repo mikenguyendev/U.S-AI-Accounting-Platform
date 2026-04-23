@@ -1,0 +1,97 @@
+# ============================================================================
+# AI Accounting Template — .gitignore
+# ============================================================================
+# PURPOSE: Keep customer data out of git. The template itself is generic and
+# white-label; each customer's workspace lives in _INSTANCES/{id}/ and contains
+# confidential business data (EIN, emails, phone numbers, etc.) that must NEVER
+# be committed to a shared repo.
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Customer workspaces — NEVER commit
+# ----------------------------------------------------------------------------
+# Each _INSTANCES/{customer_id}/ folder contains customer PII (legal name, EIN,
+# email, phone, bank accounts, payroll, etc.). Gitignore all subfolders.
+_INSTANCES/*/
+# Keep the README that explains the folder pattern
+!_INSTANCES/README.md
+
+# Exception: The fake cold-start test instance (Acme_Widget_LLC) is intentional
+# demo data with made-up fields (Jane Tester, 88-1234567 EIN, .example email
+# domain). Uncomment the line below if you WANT to commit it as a reference
+# example for new template users. Default is to exclude even fake instances so
+# nothing under _INSTANCES/ ever leaks.
+# !_INSTANCES/Acme_Widget_LLC/
+
+# ----------------------------------------------------------------------------
+# Customer deliveries — NEVER commit
+# ----------------------------------------------------------------------------
+# Zipped customer packages contain the customer's full _BUSINESS_CONFIG.json +
+# rendered docs. Entire folder tree excluded.
+_DELIVERIES/
+
+# ----------------------------------------------------------------------------
+# Pre-template legacy data — NEVER commit
+# ----------------------------------------------------------------------------
+# _DEPRECATED_pre_template/ is the ORIGINAL customer workspace from BEFORE the
+# template refactor. It was archived locally for developer reference only and
+# contains real customer PII (legal name, EIN, email, owner details). The
+# knowledge has been fully extracted into generic _MODULES/ and _CORE/ templates
+# — there is NO reason this folder should ever reach a shared git repo.
+_DEPRECATED_pre_template/
+
+# ----------------------------------------------------------------------------
+# Config files (top-level) — exclude if you've copied real data here
+# ----------------------------------------------------------------------------
+# If a developer copies their customer's real config to _CONFIG/ for testing,
+# make sure it doesn't leak. The .example.json is safe (generic); the plain
+# _BUSINESS_CONFIG.json is not.
+_CONFIG/_BUSINESS_CONFIG.json
+
+# ----------------------------------------------------------------------------
+# Local developer artifacts
+# ----------------------------------------------------------------------------
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.ropeproject/
+.claude/
+
+# Python virtual envs (if anyone runs validation scripts)
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# Node / npm (if someone adds tooling later)
+node_modules/
+package-lock.json
+yarn.lock
+
+# ----------------------------------------------------------------------------
+# Logs + temp
+# ----------------------------------------------------------------------------
+*.log
+*.tmp
+*.bak
+.tmp/
+
+# ----------------------------------------------------------------------------
+# Secrets — belt and suspenders
+# ----------------------------------------------------------------------------
+# In case a developer accidentally creates these
+.env
+.env.local
+*.pem
+*.key
+credentials.json
+secrets.json

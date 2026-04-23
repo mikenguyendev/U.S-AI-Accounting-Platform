@@ -1,0 +1,91 @@
+Account_Number,Account_Name,Account_Type,Account_Subtype,Tax_Line,Description
+1010,Cash — Operating Checking,Asset,Current Asset,Schedule L Line 1,Primary business checking account
+1020,Cash — Savings,Asset,Current Asset,Schedule L Line 1,Tax reserves and emergency fund
+1030,Cash — Payroll Account,Asset,Current Asset,Schedule L Line 1,Dedicated payroll funding (optional)
+1040,Petty Cash,Asset,Current Asset,Schedule L Line 1,Small cash on hand
+1100,Accounts Receivable,Asset,Current Asset,Schedule L Line 2a,Customer invoices outstanding
+1110,AR — Allowance for Doubtful Accounts,Asset,Current Asset,Schedule L Line 2b,Bad debt allowance (contra-asset)
+1200,Prepaid Expenses,Asset,Current Asset,Schedule L Line 6,Insurance/rent/subscriptions paid in advance
+1210,Prepaid Insurance,Asset,Current Asset,Schedule L Line 6,Annual insurance premiums prepaid
+1220,Prepaid Rent,Asset,Current Asset,Schedule L Line 6,Office/coworking space rent prepaid
+1230,Prepaid Software Subscriptions,Asset,Current Asset,Schedule L Line 6,Annual SaaS subscriptions prepaid
+1300,Employee Advances,Asset,Current Asset,Schedule L Line 6,Travel advances or payroll advances
+1500,Furniture and Fixtures,Asset,Fixed Asset,Schedule L Line 10a,Office furniture
+1510,Computer Equipment,Asset,Fixed Asset,Schedule L Line 10a,Laptops/desktops/monitors
+1520,Office Equipment,Asset,Fixed Asset,Schedule L Line 10a,Printers/copiers/phones
+1530,Leasehold Improvements,Asset,Fixed Asset,Schedule L Line 10a,Office buildouts
+1590,Accumulated Depreciation,Asset,Accumulated Depreciation,Schedule L Line 10b,Total depreciation taken (contra-asset)
+1700,Security Deposits,Asset,Other Asset,Schedule L Line 13,Office lease security deposit
+1710,Goodwill,Asset,Intangible Asset,Schedule L Line 12,Acquired goodwill (if applicable)
+2010,Accounts Payable,Liability,Current Liability,Schedule L Line 16,Vendor invoices outstanding
+2100,Credit Card Payable,Liability,Current Liability,Schedule L Line 17,Business credit card balance
+2110,Credit Card — Card 2,Liability,Current Liability,Schedule L Line 17,Secondary credit card (if applicable)
+2200,Accrued Expenses,Liability,Current Liability,Schedule L Line 17,Expenses incurred but not yet billed
+2210,Accrued Salaries and Wages,Liability,Current Liability,Schedule L Line 17,Wages earned but not yet paid
+2220,Accrued Vacation/PTO,Liability,Current Liability,Schedule L Line 17,Earned but unused PTO
+2300,Payroll Liabilities,Liability,Current Liability,Schedule L Line 17,Withheld payroll taxes pending remittance
+2310,Federal Income Tax Withheld,Liability,Current Liability,,Federal income tax pending Form 941
+2320,FICA Withheld (Employee),Liability,Current Liability,,Social Security + Medicare employee portion
+2330,FICA Payable (Employer),Liability,Current Liability,,Employer FICA match
+2340,State Income Tax Withheld,Liability,Current Liability,,State income tax withholding pending remittance
+2350,State Unemployment Tax,Liability,Current Liability,,SUI/SUTA pending remittance
+2360,Federal Unemployment Tax (FUTA),Liability,Current Liability,,FUTA pending remittance
+2400,Sales Tax Payable,Liability,Current Liability,Schedule L Line 17,State/local sales tax collected (if applicable)
+2500,Income Tax Payable,Liability,Current Liability,Schedule L Line 17,Federal/state income tax owed
+2600,Notes Payable — Short-term,Liability,Current Liability,Schedule L Line 18,Loans/notes due within 1 year
+2700,Deferred Revenue,Liability,Current Liability,Schedule L Line 17,Customer payments received before service delivered
+2800,Notes Payable — Long-term,Liability,Long-term Liability,Schedule L Line 20,Loans/notes due >1 year
+3010,Common Stock,Equity,Common Stock,Schedule L Line 22,Par value of issued stock
+3020,Additional Paid-in Capital (APIC),Equity,Additional Paid-in Capital,Schedule L Line 23,Capital contributed above par
+3030,Retained Earnings,Equity,Retained Earnings,Schedule L Line 25,Accumulated profits retained
+3040,Distributions to Shareholders,Equity,Distributions,Schedule M-2,S-Corp shareholder distributions
+3050,Owner's Capital,Equity,Owner's Equity,,For sole prop / LLC-single (use instead of Common Stock)
+3060,Owner's Drawing,Equity,Owner's Equity,,For sole prop / LLC-single owner draws
+4010,Service Revenue — Consulting,Revenue,Service Revenue,Form 1120 Line 1a,Primary consulting services revenue
+4020,Service Revenue — Project-Based,Revenue,Service Revenue,Form 1120 Line 1a,Project/retainer revenue
+4030,Service Revenue — Subscription/Retainer,Revenue,Service Revenue,Form 1120 Line 1a,Recurring monthly retainer revenue
+4040,Service Revenue — Hourly,Revenue,Service Revenue,Form 1120 Line 1a,Hourly billable revenue
+4090,Sales Returns and Allowances,Revenue,Service Revenue,Form 1120 Line 1b,Refunds/credits issued (contra-revenue)
+5010,Cost of Services — Subcontractor Fees,COGS,Cost of Services,Form 1120 Line 2,Independent contractor costs directly billable
+5020,Cost of Services — Direct Materials,COGS,Cost of Services,Form 1120 Line 2,Materials consumed in service delivery
+5030,Cost of Services — Direct Labor,COGS,Cost of Services,Form 1120 Line 2,Wages directly attributable to service delivery
+6010,Salaries and Wages,Expense,Salaries and Wages,Form 1120 Line 13,Employee compensation (excluding owner)
+6020,Officer Compensation,Expense,Salaries and Wages,Form 1120 Line 12,W-2 wages to owner-employees (S-Corp)
+6030,Payroll Tax Expense,Expense,Salaries and Wages,Form 1120 Line 17,Employer FICA + FUTA + SUI
+6040,Employee Benefits — Health Insurance,Expense,Salaries and Wages,Form 1120 Line 24,Health insurance premiums
+6050,Employee Benefits — 401(k) Match,Expense,Salaries and Wages,Form 1120 Line 23,Employer retirement contributions
+6060,Employee Benefits — Other,Expense,Salaries and Wages,Form 1120 Line 24,Other benefits (life ins/dental/vision)
+6100,Rent — Office,Expense,Rent,Form 1120 Line 16,Office rent
+6110,Rent — Equipment,Expense,Rent,Form 1120 Line 16,Equipment leasing
+6200,Utilities,Expense,Utilities,Form 1120 Line 26,Electricity/water/internet
+6210,Telephone and Internet,Expense,Utilities,Form 1120 Line 26,Phone + internet for business
+6300,Office Supplies,Expense,Office Expense,Form 1120 Line 26,Pens/paper/general supplies
+6310,Software and Subscriptions,Expense,Office Expense,Form 1120 Line 26,SaaS tools (CRM/accounting/etc.)
+6320,Computer Maintenance and Repairs,Expense,Office Expense,Form 1120 Line 8,Computer repair + maintenance
+6400,Professional Services — Legal,Expense,Professional Services,Form 1120 Line 26,Attorney fees
+6410,Professional Services — Accounting,Expense,Professional Services,Form 1120 Line 26,CPA / bookkeeping fees
+6420,Professional Services — Consulting,Expense,Professional Services,Form 1120 Line 26,Outside consulting fees
+6500,Marketing and Advertising,Expense,Marketing,Form 1120 Line 22,Ads/SEO/content marketing
+6510,Trade Shows and Conferences,Expense,Marketing,Form 1120 Line 22,Conference fees + booth costs
+6520,Website and Hosting,Expense,Marketing,Form 1120 Line 22,Domain/hosting/maintenance
+6600,Travel,Expense,Travel and Meals,Form 1120 Line 26,Business travel (transport + lodging)
+6610,Meals — 50% Deductible,Expense,Travel and Meals,Form 1120 Line 26,Business meals (IRS 50% rule)
+6620,Meals — 100% Deductible,Expense,Travel and Meals,Form 1120 Line 26,Office snacks/team meals (qualifying)
+6700,Insurance — General Liability,Expense,Insurance,Form 1120 Line 18,GL insurance premiums
+6710,Insurance — Workers' Comp,Expense,Insurance,Form 1120 Line 18,Workers' comp premiums
+6720,Insurance — Errors and Omissions (E&O),Expense,Insurance,Form 1120 Line 18,Professional liability insurance
+6730,Insurance — Cyber Liability,Expense,Insurance,Form 1120 Line 18,Cyber/data breach insurance
+6800,Bank Fees,Expense,Other Operating Expense,Form 1120 Line 26,Bank service charges
+6810,Credit Card Processing Fees,Expense,Other Operating Expense,Form 1120 Line 26,Stripe/Square/merchant fees
+6820,Dues and Subscriptions,Expense,Other Operating Expense,Form 1120 Line 26,Professional memberships
+6830,Continuing Education,Expense,Other Operating Expense,Form 1120 Line 26,Courses/certifications/training
+6840,Charitable Contributions,Expense,Other Operating Expense,Form 1120 Line 19,Donations (subject to 10% limit)
+6850,Depreciation Expense,Expense,Depreciation,Form 1120 Line 20,Annual depreciation
+6900,Other Operating Expenses,Expense,Other Operating Expense,Form 1120 Line 26,Catch-all for uncategorized
+7010,Interest Income,Other_Income,Interest Income,Form 1120 Line 5,Bank interest earned
+7020,Other Income,Other_Income,Other Operating Expense,Form 1120 Line 10,Misc non-operating income
+7100,Interest Expense,Other_Expense,Interest Expense,Form 1120 Line 18,Loan/credit card interest
+7200,Federal Income Tax Expense,Other_Expense,Tax Expense,Form 1120 Line 31,Federal corporate tax (C-Corp only)
+7210,State Income Tax Expense,Other_Expense,Tax Expense,Form 1120 Line 17,State corporate tax
+7220,State Franchise Tax,Other_Expense,Tax Expense,Form 1120 Line 17,CA franchise tax / DE franchise tax / etc.
+7300,Loss on Sale of Assets,Other_Expense,Gain/Loss on Sale of Assets,Form 1120 Line 26,Loss on disposal of fixed assets

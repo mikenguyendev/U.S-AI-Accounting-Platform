@@ -1,0 +1,67 @@
+AI Accounting Controller — White-Label Template
+Copyright (c) 2026 mikenguyen.dev@gmail.com
+
+All rights reserved.
+
+================================================================================
+USAGE TERMS
+================================================================================
+
+This software and accompanying templates, modules, schemas, and documentation
+(collectively, "the Template") are provided by the developer
+(mikenguyen.dev@gmail.com) under the following terms:
+
+1. PERMITTED USE
+   - Personal use for managing your own business accounting workflow
+   - Internal use within a single company organization
+   - Modification of templates and configuration files for your own deployment
+   - Sharing rendered instances with employees of the same organization
+
+2. PROHIBITED USE (without written permission from developer)
+   - Redistribution of the Template (modified or unmodified) to third parties
+   - Reselling the Template or derivative works
+   - Sublicensing the Template
+   - Removal of developer attribution from documentation
+   - Use as a basis for a competing commercial product
+
+3. ATTRIBUTION
+   The developer attribution (mikenguyen.dev@gmail.com) must remain in:
+   - README.md
+   - LICENSE (this file)
+   - _CORE/RENDER_PROTOCOL.md
+   - Generated instance documentation footer
+
+4. COMMERCIAL LICENSING
+   For commercial use beyond a single organization, OEM licensing,
+   white-label resale rights, or custom development services,
+   please contact: mikenguyen.dev@gmail.com
+
+5. DISCLAIMER OF WARRANTY
+   THE TEMPLATE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+   IN NO EVENT SHALL THE DEVELOPER BE LIABLE FOR ANY CLAIM, DAMAGES OR
+   OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+   ARISING FROM, OUT OF OR IN CONNECTION WITH THE TEMPLATE OR THE USE OR
+   OTHER DEALINGS IN THE TEMPLATE.
+
+6. NOT TAX OR LEGAL ADVICE
+   THE TEMPLATE PROVIDES ACCOUNTING WORKFLOW AUTOMATION ONLY.
+   IT DOES NOT CONSTITUTE TAX, LEGAL, OR FINANCIAL ADVICE. USERS MUST
+   CONSULT A LICENSED CPA OR TAX PROFESSIONAL FOR JURISDICTION-SPECIFIC
+   COMPLIANCE, AUDIT MATTERS, OR COMPLEX TAX DECISIONS.
+
+7. DATA PRIVACY
+   USERS ARE RESPONSIBLE FOR THE SECURITY AND PRIVACY OF DATA
+   PROCESSED THROUGH THE TEMPLATE. THE DEVELOPER IS NOT LIABLE FOR
+   ANY DATA BREACH, LOSS, OR UNAUTHORIZED DISCLOSURE.
+
+================================================================================
+CONTACT
+================================================================================
+
+Developer: mikenguyen.dev@gmail.com
+For licensing inquiries, bug reports, feature requests, or support.
+
+================================================================================

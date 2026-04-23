@@ -1,0 +1,695 @@
+# 📘 Use Cases Guide — Hướng dẫn các tình huống sử dụng
+
+> **Tài liệu này liệt kê các use case phổ biến mà {{OWNER.NAME}} có thể sử dụng để làm việc với AI Accounting Controller. Mỗi use case bao gồm: ngữ cảnh sử dụng, prompt mẫu, thông tin cần chuẩn bị, và deliverable đầu ra.**
+
+**Company:** {{COMPANY.LEGAL_NAME}}
+**Last Updated:** {{COMPUTED:TODAY|long_date}}
+**Fiscal Year:** FY{{FISCAL_YEAR.YEAR}}
+**Entity Type:** {{COMPANY.ENTITY_TYPE}}
+**State:** {{FORMAT:OPERATIONS.STATE_OF_OPERATION|state_name}}
+
+---
+
+## 🗂️ MỤC LỤC USE CASES
+
+| # | Category | Use Case | Độ ưu tiên |
+|---|----------|----------|------------|
+| 1 | AP/AR | Ghi nhận hóa đơn nhà cung cấp (Vendor Invoice Entry) | ⭐⭐⭐ |
+| 2 | AP/AR | Tạo hóa đơn bán hàng (Customer Invoice Creation) | ⭐⭐⭐ |
+| 3 | AP/AR | Báo cáo tuổi nợ (AR/AP Aging Report) | ⭐⭐ |
+| 4 | GL | Hạch toán bút toán (Journal Entry) | ⭐⭐⭐ |
+| 5 | GL | Bút toán điều chỉnh cuối kỳ (Adjusting Entries) | ⭐⭐ |
+| 6 | GL | Thiết lập Chart of Accounts (COA) | ⭐⭐ |
+| 7 | Bank | Đối soát ngân hàng hàng tháng (Bank Reconciliation) | ⭐⭐⭐ |
+| 8 | Tax | Chuẩn bị Form 1099-NEC cho contractors | ⭐⭐⭐ |
+| 9 | Tax | Chuẩn bị dữ liệu W-2 cho employees | ⭐⭐⭐ |
+| 10 | Tax | Tính Estimated Tax Payment (quarterly) | ⭐⭐⭐ |
+| 11 | Tax | Chuẩn bị dữ liệu {{FORMAT:COMPANY.ENTITY_TYPE|tax_form}} | ⭐⭐ |
+| 12 | Payroll | Xử lý bảng lương theo kỳ (Payroll Processing) | ⭐⭐⭐ |
+| 13 | Payroll | Tính khấu trừ thuế (Tax Withholding Calculation) | ⭐⭐ |
+| 14 | Report | Lập báo cáo P&L (Income Statement) | ⭐⭐⭐ |
+| 15 | Report | Lập Balance Sheet | ⭐⭐⭐ |
+| 16 | Report | Lập Cash Flow Statement | ⭐⭐ |
+| 17 | Report | Monthly Close Package | ⭐⭐⭐ |
+| 18 | Budget | Phân tích chênh lệch ngân sách (Variance Analysis) | ⭐⭐ |
+| 19 | Combined | Quy trình đóng sổ cuối tháng (Month-End Close) | ⭐⭐⭐ |
+| 20 | Combined | Chuẩn bị gói kiểm toán (Audit Package) | ⭐⭐ |
+
+---
+
+# 📂 CATEGORY 1: AP/AR MANAGEMENT
+
+## Use Case 1: Ghi nhận hóa đơn nhà cung cấp (Vendor Invoice Entry)
+
+**Khi nào dùng:** Có hóa đơn mới từ nhà cung cấp (utility bill, office supplies, software subscription...)
+
+**Prompt mẫu:**
+```
+Tôi cần ghi nhận hóa đơn mới từ nhà cung cấp:
+- Vendor: ACME Office Supplies
+- Invoice #: INV-{{FISCAL_YEAR.YEAR}}-0412
+- Date: April 15, {{FISCAL_YEAR.YEAR}}
+- Amount: $1,234.56
+- Due date: May 15, {{FISCAL_YEAR.YEAR}} (Net 30)
+- Description: Office supplies for Q2
+- Account: 6200 - Office Supplies Expense
+
+Hãy:
+1. Tạo journal entry để hạch toán
+2. Lưu file hóa đơn vào folder phù hợp
+3. Thêm vào AP aging tracker
+```
+
+**Thông tin cần chuẩn bị:**
+- File PDF hóa đơn gốc (scan hoặc download)
+- Payment terms (Net 15/30/60)
+- Tài khoản chi phí (expense account) phù hợp
+
+**Deliverable:**
+- Journal entry ghi sổ: `Dr. Expense / Cr. Accounts Payable`
+- File hóa đơn được lưu: `01_AP-AR_Management/Accounts_Payable/Vendor_Invoices/`
+- AP aging tracker cập nhật
+
+---
+
+## Use Case 2: Tạo hóa đơn bán hàng (Customer Invoice Creation)
+
+**Khi nào dùng:** Cần phát hành hóa đơn cho khách hàng của {{COMPANY.LEGAL_NAME}}
+
+**Prompt mẫu:**
+```
+Tạo hóa đơn cho khách hàng:
+- Customer: Client ABC Corp
+- Service: {{COMPANY.INDUSTRY}} services — Q1 {{FISCAL_YEAR.YEAR}}
+- Amount: $15,000.00
+- Payment terms: Net 30
+- Service period: January – March {{FISCAL_YEAR.YEAR}}
+
+Tạo invoice chuẩn và lưu vào AR folder.
+```
+
+**Thông tin cần chuẩn bị:**
+- Customer name, address, contact
+- Service description và billing period
+- Payment terms
+- Invoice number (tiếp theo trong sequence, prefix `{{BRANDING.INVOICE_PREFIX}}`)
+
+**Deliverable:**
+- File invoice (.xlsx hoặc .pdf) theo format chuẩn
+- Journal entry: `Dr. Accounts Receivable / Cr. Revenue`
+- Lưu tại `01_AP-AR_Management/Accounts_Receivable/Customer_Invoices/`
+
+---
+
+## Use Case 3: Báo cáo tuổi nợ (AR/AP Aging Report)
+
+**Khi nào dùng:** Review công nợ định kỳ (tuần/tháng)
+
+**Prompt mẫu:**
+```
+Tạo AR Aging Report tính đến ngày April 30, {{FISCAL_YEAR.YEAR}}.
+Phân loại:
+- Current (not yet due)
+- 1-30 days overdue
+- 31-60 days overdue
+- 61-90 days overdue
+- 90+ days overdue (high risk)
+
+Highlight các khoản > $5,000 đã quá hạn 60+ ngày.
+```
+
+**Deliverable:**
+- Aging report (Excel) với breakdown theo buckets
+- Danh sách khách hàng có rủi ro thu hồi cao
+- Đề xuất collection actions
+
+---
+
+# 📂 CATEGORY 2: GENERAL LEDGER
+
+## Use Case 4: Hạch toán bút toán (Journal Entry)
+
+**Khi nào dùng:** Mọi nghiệp vụ kinh tế phát sinh cần ghi sổ
+
+**Prompt mẫu:**
+```
+Hạch toán nghiệp vụ sau:
+- Date: April 20, {{FISCAL_YEAR.YEAR}}
+- Transaction: Mua máy laptop cho nhân viên IT
+- Amount: $2,500.00
+- Payment method: Company credit card
+- Expected useful life: 3 years
+
+Xác định:
+1. Đây là CapEx hay OpEx? (threshold: {{FORMAT:APPROVAL_THRESHOLDS.CAPEX_THRESHOLD|currency}})
+2. Bút toán hạch toán đầy đủ
+3. Depreciation schedule nếu là CapEx
+```
+
+**Deliverable:**
+- Phân tích CapEx vs OpEx (ngưỡng capitalization {{FORMAT:APPROVAL_THRESHOLDS.CAPEX_THRESHOLD|currency}})
+- Journal entry với account codes cụ thể
+- Depreciation schedule (nếu CapEx): Straight-line method
+
+**Ví dụ output:**
+```
+Analysis: $2,500 ≥ {{FORMAT:APPROVAL_THRESHOLDS.CAPEX_THRESHOLD|currency}} capitalization threshold → CapEx
+Journal Entry (April 20, {{FISCAL_YEAR.YEAR}}):
+  Dr. 1500 - Computer Equipment      $2,500.00
+      Cr. 2100 - Credit Card Payable          $2,500.00
+
+Depreciation Schedule (3-year SL):
+  Monthly depreciation: $69.44
+  Annual depreciation: $833.33
+```
+
+---
+
+## Use Case 5: Bút toán điều chỉnh cuối kỳ (Adjusting Entries)
+
+**Khi nào dùng:** Cuối tháng/quý, cần điều chỉnh cho accruals, deferrals, depreciation
+
+**Prompt mẫu:**
+```
+Review và đề xuất các adjusting entries cho month-end April {{FISCAL_YEAR.YEAR}}:
+- Prepaid insurance: $12,000 (annual, paid Jan 1) → cần ghi nhận 4 tháng
+- Accrued salaries: $8,500 (pay period ends May 3, cover Apr 27-30)
+- Depreciation expense: theo fixed asset schedule
+- Utilities accrual: tháng 4 ước tính $450
+```
+
+**Deliverable:**
+- Danh sách tất cả adjusting entries cần thiết
+- Journal entries đầy đủ với explanations
+- Impact lên Trial Balance
+
+---
+
+## Use Case 6: Thiết lập Chart of Accounts
+
+**Khi nào dùng:** Thiết lập ban đầu hoặc thêm account mới
+
+**Prompt mẫu:**
+```
+Tạo Chart of Accounts chuẩn cho {{COMPANY.LEGAL_NAME}} theo industry preset {{COMPANY.INDUSTRY}}.
+Cấu trúc 5 groups:
+- 1000-1999: Assets
+- 2000-2999: Liabilities
+- 3000-3999: Equity
+- 4000-4999: Revenue
+- 5000-5999: Cost of Goods Sold / Services
+- 6000-6999: Operating Expenses
+- 7000-7999: Other Income/Expenses
+
+Size: {{CHART_OF_ACCOUNTS.SIZE}} (~{{IF:CHART_OF_ACCOUNTS.SIZE == "Minimal"}}30-40{{ENDIF}}{{IF:CHART_OF_ACCOUNTS.SIZE == "Standard"}}50-70{{ENDIF}}{{IF:CHART_OF_ACCOUNTS.SIZE == "Extended"}}80-120{{ENDIF}} accounts)
+Base template: `_TEMPLATES/COA/COA_{{COMPANY.INDUSTRY}}.xlsx`
+
+Export ra Excel file.
+```
+
+**Deliverable:**
+- File `Chart_of_Accounts_{{INSTANCE_ID}}_FY{{FISCAL_YEAR.YEAR}}.xlsx`
+- Lưu tại `02_General_Ledger/Chart_of_Accounts/`
+
+---
+
+# 📂 CATEGORY 3: BANK RECONCILIATION
+
+## Use Case 7: Đối soát ngân hàng hàng tháng
+
+**Khi nào dùng:** Ngày 1-5 hàng tháng, đối soát tháng trước
+
+**Prompt mẫu:**
+```
+Tôi vừa upload sao kê [Bank Name] tháng March {{FISCAL_YEAR.YEAR}}.
+Đối soát với sổ sách và tạo Bank Reconciliation Report.
+
+Info:
+- Book balance (GL): $125,430.22
+- Bank statement ending balance: $127,850.50
+- Date range: March 1-31, {{FISCAL_YEAR.YEAR}}
+
+Xác định:
+1. Outstanding checks (đã phát hành chưa clear)
+2. Deposits in transit
+3. Bank fees chưa ghi sổ
+4. Interest earned chưa ghi sổ
+5. Discrepancies cần điều tra
+```
+
+**Thông tin cần chuẩn bị:**
+- Bank statement (PDF hoặc CSV)
+- GL trial balance account 1010 - Cash
+- Check register
+
+**Deliverable:**
+- Bank Reconciliation Worksheet (Excel)
+- Danh sách adjusting entries cần post
+- Flagged items nếu có bất thường
+
+---
+
+# 📂 CATEGORY 4: TAX COMPLIANCE
+
+## Use Case 8: Chuẩn bị Form 1099-NEC cho Contractors
+
+**Khi nào dùng:** Tháng 1 hàng năm, hoặc khi cần tổng hợp theo dõi
+
+**Prompt mẫu:**
+```
+Chuẩn bị dữ liệu Form 1099-NEC cho FY{{COMPUTED:PRIOR_FY}} (deadline: Jan 31, {{FISCAL_YEAR.YEAR}}).
+Criteria:
+- Non-employee contractors
+- Total payments > $600 trong năm
+- Không bao gồm payments qua credit card (đã có 1099-K)
+
+Rà soát tất cả vendor payments và identify đối tượng cần 1099.
+```
+
+**Deliverable:**
+- Danh sách contractors cần 1099
+- Total payments từng người
+- W-9 checklist (TIN, legal name)
+- Draft 1099-NEC forms
+
+---
+
+## Use Case 9: Chuẩn bị dữ liệu W-2 cho Employees
+
+**Khi nào dùng:** Tháng 1 hàng năm (deadline: Jan 31)
+
+**Prompt mẫu:**
+```
+Tổng hợp dữ liệu W-2 cho tất cả employees FY{{COMPUTED:PRIOR_FY}}:
+- Box 1: Wages, tips, other compensation
+- Box 2: Federal income tax withheld
+- Box 3: Social Security wages
+- Box 4: Social Security tax withheld
+- Box 5: Medicare wages
+- Box 6: Medicare tax withheld
+- Box 12: Codes D (401k), DD (Employer-sponsored health)
+
+Verify tổng khớp với Form 941 đã nộp các quý.
+```
+
+**Deliverable:**
+- Spreadsheet tổng hợp W-2 data
+- Reconciliation với Q1-Q4 Form 941
+- Flagged discrepancies nếu có
+
+---
+
+## Use Case 10: Tính Estimated Tax Payment
+
+**Khi nào dùng:** Trước các deadline Q1 (4/15), Q2 (6/15), Q3 (9/15), Q4 (1/15 năm sau)
+
+**Prompt mẫu:**
+```
+Tính {{COMPUTED:CURRENT_QUARTER}} {{FISCAL_YEAR.YEAR}} Estimated Tax Payment.
+Data:
+- YTD revenue: $850,000
+- YTD expenses: $620,000
+- YTD taxable income: $230,000
+{{IF:COMPANY.ENTITY_TYPE == "C-Corp"}}
+- Federal corporate tax rate: 21%
+- Prior year safe harbor: 100% of FY{{COMPUTED:PRIOR_FY}} tax
+{{ENDIF}}
+{{IF:COMPANY.ENTITY_TYPE IN ["S-Corp", "LLC-multi", "Partnership", "LLC-single", "Sole-Prop"]}}
+- Pass-through entity: tax flows to owner's 1040-ES
+- Owner's marginal rate (estimated): TBD
+- Self-employment tax: 15.3% (if applicable)
+{{ENDIF}}
+
+Tính:
+1. Current year method
+2. Safe harbor method
+3. Recommend phương án tối ưu
+```
+
+**Deliverable:**
+- Calculation worksheet
+- Recommended payment amount
+- Form 1040-ES draft (pass-through) hoặc 1120-W (C-Corp)
+- Reminder set cho next quarterly deadline
+
+---
+
+## Use Case 11: Chuẩn bị dữ liệu {{FORMAT:COMPANY.ENTITY_TYPE|tax_form}}
+
+**Khi nào dùng:**
+{{IF:COMPANY.ENTITY_TYPE == "C-Corp"}}
+Q1 mỗi năm (deadline April 15 hoặc extension October 15)
+{{ENDIF}}
+{{IF:COMPANY.ENTITY_TYPE IN ["S-Corp", "LLC-multi", "Partnership"]}}
+Q1 mỗi năm (deadline March 15 hoặc extension September 15)
+{{ENDIF}}
+{{IF:COMPANY.ENTITY_TYPE IN ["LLC-single", "Sole-Prop"]}}
+Cùng deadline với owner's 1040 (April 15 hoặc extension October 15)
+{{ENDIF}}
+
+**Prompt mẫu:**
+```
+Chuẩn bị data package cho {{FORMAT:COMPANY.ENTITY_TYPE|tax_form}} FY{{COMPUTED:PRIOR_FY}}:
+1. Income Statement final
+2. Balance Sheet (Jan 1, {{COMPUTED:PRIOR_FY}} và Dec 31, {{COMPUTED:PRIOR_FY}})
+3. M-1 Reconciliation (Book income vs Taxable income)
+4. M-2 Analysis of Retained Earnings
+5. Schedule K details
+{{IF:COMPANY.ENTITY_TYPE IN ["S-Corp", "LLC-multi", "Partnership"]}}
+6. K-1 statements cho từng shareholder/partner
+{{ENDIF}}
+{{IF:COMPANY.ENTITY_TYPE == "C-Corp"}}
+6. Dividend distributions
+{{ENDIF}}
+
+Tổng hợp thành package để nộp CPA review.
+```
+
+**Deliverable:**
+- Data package (Excel workbook đa sheet)
+- Supporting schedules
+- List of permanent/temporary differences (M-1)
+- Notes cho CPA về unusual items
+
+---
+
+# 📂 CATEGORY 5: PAYROLL
+
+## Use Case 12: Xử lý bảng lương theo kỳ
+
+**Khi nào dùng:** Mỗi pay period (semi-monthly: 15th và last day, hoặc theo schedule khác)
+
+**Prompt mẫu:**
+```
+Xử lý payroll cho pay period ending April 30, {{FISCAL_YEAR.YEAR}}:
+- 12 employees
+- Pay frequency: Semi-monthly
+- Gross wages total: $48,500
+- Overtime hours: 12 hrs @ 1.5x
+
+Tính:
+1. Gross wages từng employee
+2. Federal income tax withholding (theo W-4)
+3. FICA: SS 6.2% (up to $168,600 cap), Medicare 1.45% + 0.9% Additional Medicare trên $200k
+4. State tax withholding ({{OPERATIONS.STATE_OF_OPERATION}}) — xem `_MODULES/state/{{OPERATIONS.STATE_OF_OPERATION}}.md#withholding-tables`
+5. 401(k) contributions (employee deferrals)
+6. Health insurance deductions
+7. Net pay
+8. Employer-side taxes (FUTA 0.6%, state SUI varies)
+```
+
+**Deliverable:**
+- Payroll register (Excel)
+- Pay stubs cho từng employee
+- Journal entry: `Dr. Salaries Expense / Cr. Various Payables`
+- Tax liability summary cho 941 filing
+
+---
+
+## Use Case 13: Tính Tax Withholding
+
+**Khi nào dùng:** Khi có employee mới hoặc thay đổi W-4
+
+**Prompt mẫu:**
+```
+Employee mới: John Smith
+- Annual salary: $75,000
+- Pay frequency: Semi-monthly
+- W-4: Single, 0 dependents, no additional withholding
+- State: {{OPERATIONS.STATE_OF_OPERATION}}
+
+Tính per-paycheck withholding:
+1. Federal income tax ({{FISCAL_YEAR.YEAR}} tax tables)
+2. {{FORMAT:OPERATIONS.STATE_OF_OPERATION|state_name}} state income tax (theo `_MODULES/state/{{OPERATIONS.STATE_OF_OPERATION}}.md`)
+3. FICA (SS + Medicare)
+4. State-specific taxes (SDI/SUI/ETT nếu applicable)
+```
+
+**Deliverable:**
+- Per-paycheck tax calculation
+- Net pay estimate
+- W-4 form on file
+- State tax form on file (xem state module cho form name)
+
+---
+
+# 📂 CATEGORY 6: FINANCIAL REPORTING
+
+## Use Case 14: Lập báo cáo P&L (Income Statement)
+
+**Khi nào dùng:** Monthly/Quarterly close
+
+**Prompt mẫu:**
+```
+Lập P&L Statement cho tháng April {{FISCAL_YEAR.YEAR}} và YTD (Jan-Apr):
+- Revenue breakdown theo service lines
+- COGS với gross profit margin
+- Operating expenses theo categories
+- EBITDA
+- Depreciation & Amortization
+- Interest expense
+- Income tax expense
+- Net income
+
+So sánh với cùng kỳ năm trước (April {{COMPUTED:PRIOR_FY}}) và Budget.
+```
+
+**Deliverable:**
+- P&L Statement (Excel) với 3 cột: Current Month, YTD, Prior Year
+- Variance analysis
+- Lưu tại `06_Financial_Reporting/Profit_and_Loss/`
+
+---
+
+## Use Case 15: Lập Balance Sheet
+
+**Khi nào dùng:** Month-end, Quarter-end, Year-end
+
+**Prompt mẫu:**
+```
+Lập Balance Sheet tính đến April 30, {{FISCAL_YEAR.YEAR}}.
+Yêu cầu:
+- Current Assets (Cash, A/R, Prepaid, Inventory)
+- Fixed Assets (PP&E net of accumulated depreciation)
+- Current Liabilities (A/P, Accrued, Short-term debt)
+- Long-term Liabilities
+- Equity (Common Stock, Retained Earnings)
+
+Verify: Total Assets = Total Liabilities + Equity (đến từng cent).
+```
+
+**Deliverable:**
+- Balance Sheet (Excel) comparison format
+- Supporting schedules (A/R aging, fixed asset register)
+- Proof of balancing
+
+---
+
+## Use Case 16: Lập Cash Flow Statement
+
+**Khi nào dùng:** Quarterly và Year-end
+
+**Prompt mẫu:**
+```
+Lập Cash Flow Statement Q1 {{FISCAL_YEAR.YEAR}} theo Indirect Method:
+1. Operating Activities (bắt đầu từ Net Income)
+2. Investing Activities (CapEx, investments)
+3. Financing Activities (debt, dividends, equity)
+
+Reconcile với beginning/ending cash balances.
+```
+
+**Deliverable:**
+- Cash Flow Statement (Excel)
+- Reconciliation với Balance Sheet cash accounts
+- Supplemental disclosures (non-cash transactions)
+
+---
+
+## Use Case 17: Monthly Close Package
+
+**Khi nào dùng:** 10 ngày đầu tháng (close tháng trước)
+
+**Prompt mẫu:**
+```
+Thực hiện Month-End Close cho April {{FISCAL_YEAR.YEAR}}.
+Complete full package:
+1. Trial Balance review
+2. Adjusting entries posted
+3. P&L Statement
+4. Balance Sheet
+5. Cash Flow (YTD)
+6. Bank reconciliation completed
+7. AR/AP aging
+8. Variance analysis vs Budget
+9. Executive summary (1 page)
+```
+
+**Deliverable:**
+- Complete Monthly Close Package (ZIP hoặc folder)
+- Executive Summary dashboard
+- List of outstanding items cho next month
+- Lưu tại `06_Financial_Reporting/Monthly_Close/{{FISCAL_YEAR.YEAR}}-04/`
+
+---
+
+# 📂 CATEGORY 7: BUDGET & VARIANCE
+
+## Use Case 18: Phân tích chênh lệch ngân sách
+
+**Khi nào dùng:** Monthly review, especially cho department heads
+
+**Prompt mẫu:**
+```
+Phân tích variance cho IT Department — April {{FISCAL_YEAR.YEAR}}:
+- Budget: $4,000.00
+- Actual: $4,500.20
+- Variance: $500.20 unfavorable (12% over)
+
+Điều tra:
+1. Root cause của variance
+2. Phân biệt one-time vs recurring
+3. Impact lên YTD budget
+4. Recommend action items
+```
+
+**Deliverable:**
+- Variance analysis report
+- Drill-down theo GL accounts
+- Recommendations (re-forecast, budget amendment, cost control)
+
+---
+
+# 📂 CATEGORY 8: COMBINED WORKFLOWS
+
+## Use Case 19: Quy trình đóng sổ cuối tháng (Full Month-End Close)
+
+**Khi nào dùng:** Quy trình tiêu chuẩn hàng tháng
+
+**Workflow đầy đủ:**
+
+**Phase 1: Pre-Close (Last 3 business days of month)**
+- [ ] Cut-off testing cho A/R, A/P
+- [ ] Inventory count (nếu áp dụng)
+- [ ] Review pending transactions
+
+**Phase 2: Close Week 1 (Day 1-5)**
+- [ ] Bank reconciliation cho tất cả accounts
+- [ ] Post recurring journal entries
+- [ ] Accruals: utilities, payroll, interest
+- [ ] Depreciation entries
+- [ ] Prepaid expense amortization
+
+**Phase 3: Close Week 2 (Day 6-10)**
+- [ ] Trial Balance review
+- [ ] Investigate và clear suspense accounts
+- [ ] Finalize adjusting entries
+- [ ] Generate financial statements
+- [ ] Budget variance analysis
+- [ ] Executive reporting package
+- [ ] Lock period trong accounting system
+
+**Prompt kích hoạt:**
+```
+Khởi động Month-End Close cho [Month YYYY].
+Theo dõi qua checklist và báo cáo tiến độ từng phase.
+```
+
+---
+
+## Use Case 20: Chuẩn bị gói kiểm toán (Audit Package)
+
+**Khi nào dùng:** Annual audit, due diligence, IRS audit
+
+**Prompt mẫu:**
+```
+Chuẩn bị Audit Package cho FY{{COMPUTED:PRIOR_FY}} (cho external CPA firm):
+1. Trial Balance đầu kỳ và cuối kỳ
+2. General Ledger chi tiết
+3. Financial Statements (audited draft)
+4. Bank confirmations
+5. A/R aging + bad debt allowance support
+6. Fixed asset register với additions/disposals
+7. Lease agreements và amortization schedules
+8. Tax returns filed ({{FORMAT:COMPANY.ENTITY_TYPE|tax_form}}, 941, W-3)
+9. Board meeting minutes (resolutions)
+10. Contracts >$100,000 (sample)
+
+Organize theo standard audit trail.
+```
+
+**Deliverable:**
+- Complete audit package (organized folders)
+- Master index file
+- Narrative cho significant transactions
+- Lưu tại `00_Archive/FY{{COMPUTED:PRIOR_FY}}/Audit_Package/`
+
+---
+
+# 🎯 QUICK START — BẮT ĐẦU NGAY
+
+### Các tình huống phổ biến nhất, copy-paste để bắt đầu:
+
+**1. "Hôm nay tôi có hóa đơn mới cần hạch toán"**
+→ Dùng **Use Case 1** (Vendor Invoice Entry)
+
+**2. "Đã đến đầu tháng, cần close tháng trước"**
+→ Dùng **Use Case 19** (Full Month-End Close)
+
+**3. "Cần báo cáo tài chính cho board meeting"**
+→ Dùng **Use Case 17** (Monthly Close Package)
+
+**4. "Sắp đến deadline thuế"**
+→ Dùng **Use Case 10** (Estimated Tax) hoặc **Use Case 11** ({{FORMAT:COMPANY.ENTITY_TYPE|tax_form}})
+
+**5. "Cần hiểu tại sao chi phí tháng này cao bất thường"**
+→ Dùng **Use Case 18** (Variance Analysis)
+
+---
+
+# 💡 TIPS KHI LÀM VIỆC VỚI AI AGENT
+
+### 1. Cung cấp đầy đủ context
+✅ **Tốt:** "Hạch toán vendor invoice #INV-{{FISCAL_YEAR.YEAR}}-0412 từ ACME Corp, $1,234.56, Net 30, cho office supplies Q2"
+❌ **Chưa đủ:** "Ghi hóa đơn"
+
+### 2. Đính kèm file khi có
+- Upload trực tiếp hóa đơn PDF, bank statement, invoice...
+- AI sẽ đọc và extract data chính xác hơn
+
+### 3. Yêu cầu rõ deliverable
+- "Tạo Excel file" / "Generate PDF" / "Update tracker"
+- AI sẽ lưu đúng folder theo convention
+
+### 4. Xác nhận số liệu quan trọng
+- Với các nghiệp vụ > {{FORMAT:APPROVAL_THRESHOLDS.TIER_2_MAX|currency}}, AI sẽ đề nghị verify trước khi post
+- Luôn double-check trước month-end lock
+
+### 5. Sử dụng thuật ngữ chuẩn Mỹ
+- "Revenue" thay vì "Turnover"
+- "Fiscal Year" thay vì "Financial Year"
+- Điều này giúp AI hiểu đúng context GAAP
+
+---
+
+# 📋 CHECKLIST KHỞI ĐỘNG LẦN ĐẦU
+
+Trước khi bắt đầu sử dụng intensively, hoàn thành các setup sau:
+
+- [{{IF:OPERATIONS.STATE_OF_OPERATION EXISTS}}x{{ENDIF}}] Xác nhận **State of operation** ({{OPERATIONS.STATE_OF_OPERATION}})
+- [{{IF:COMPANY.ENTITY_TYPE EXISTS}}x{{ENDIF}}] Xác nhận **Entity type** ({{COMPANY.ENTITY_TYPE}})
+- [{{IF:CHART_OF_ACCOUNTS.FILE_PATH EXISTS}}x{{ENDIF}}] Cung cấp **Chart of Accounts** hiện tại (hoặc yêu cầu AI tạo từ template `_TEMPLATES/COA/COA_{{COMPANY.INDUSTRY}}.xlsx`)
+- [ ] Upload **opening Trial Balance** FY{{FISCAL_YEAR.YEAR}}
+- [{{IF:OPERATIONS.ACCOUNTING_SOFTWARE EXISTS}}x{{ENDIF}}] Xác nhận **Accounting software** ({{OPERATIONS.ACCOUNTING_SOFTWARE}})
+- [{{IF:BANK_ACCOUNTS.0 EXISTS}}x{{ENDIF}}] Cung cấp **list of bank accounts** + credit cards
+- [{{IF:EMPLOYEES.0 EXISTS}}x{{ENDIF}}] Cung cấp **list of employees**
+- [{{IF:CONTRACTORS.0 EXISTS}}x{{ENDIF}}] Cung cấp **list of contractors**
+- [{{IF:APPROVAL_THRESHOLDS.PRESET EXISTS}}x{{ENDIF}}] Thiết lập **approval thresholds** ({{APPROVAL_THRESHOLDS.PRESET}})
+
+---
+
+**📌 Lưu ý:** Nếu có use case không nằm trong danh sách trên, cứ hỏi trực tiếp — AI sẽ tự động phân loại và xử lý theo đúng framework GAAP.
+
+**Prepared by:** AI Accounting Controller — {{COMPANY.LEGAL_NAME}}
+**For:** {{OWNER.NAME}} ({{OWNER.EMAIL}})
+**Document Version:** Generated từ template v1.0.0 by mikenguyen.dev@gmail.com ({{COMPUTED:TODAY|iso_date}})

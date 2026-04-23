@@ -1,0 +1,117 @@
+Account_Number,Account_Name,Account_Type,Account_Subtype,Tax_Line,Description
+1010,Cash — Operating Checking,Asset,Current Asset,Schedule L Line 1,Primary checking
+1020,Cash — Savings,Asset,Current Asset,Schedule L Line 1,Reserves
+1030,Cash — Payroll,Asset,Current Asset,Schedule L Line 1,Payroll funding
+1040,Petty Cash,Asset,Current Asset,Schedule L Line 1,Petty cash
+1100,Accounts Receivable,Asset,Current Asset,Schedule L Line 2a,Customer invoices outstanding
+1110,AR — Allowance for Doubtful Accounts,Asset,Current Asset,Schedule L Line 2b,Bad debt allowance
+1120,Notes Receivable — Customer Financing,Asset,Current Asset,Schedule L Line 4,Customer notes (if extending credit)
+1200,Inventory — Raw Materials,Asset,Current Asset,Schedule L Line 3,Raw materials inventory
+1210,Inventory — Work in Process (WIP),Asset,Current Asset,Schedule L Line 3,Partially completed goods
+1220,Inventory — Finished Goods,Asset,Current Asset,Schedule L Line 3,Completed goods awaiting sale
+1230,Inventory — Spare Parts/MRO,Asset,Current Asset,Schedule L Line 3,Maintenance/repair/operating supplies
+1240,Inventory — Reserve for Obsolescence,Asset,Current Asset,Schedule L Line 3,Allowance for obsolete inventory (contra)
+1300,Prepaid Expenses,Asset,Current Asset,Schedule L Line 6,General prepaid
+1310,Prepaid Insurance,Asset,Current Asset,Schedule L Line 6,Insurance prepaid
+1320,Prepaid Rent,Asset,Current Asset,Schedule L Line 6,Facility rent prepaid
+1330,Prepaid Materials Deposits,Asset,Current Asset,Schedule L Line 6,Vendor deposits
+1500,Land,Asset,Fixed Asset,Schedule L Line 11,Land owned (NOT depreciated)
+1510,Buildings,Asset,Fixed Asset,Schedule L Line 10a,Manufacturing facility
+1520,Machinery and Equipment — Production,Asset,Fixed Asset,Schedule L Line 10a,Production machinery
+1530,Equipment — Tools and Dies,Asset,Fixed Asset,Schedule L Line 10a,Specialized tooling
+1540,Equipment — Material Handling,Asset,Fixed Asset,Schedule L Line 10a,Forklifts/conveyors
+1550,Equipment — Office,Asset,Fixed Asset,Schedule L Line 10a,Office equipment
+1560,Vehicles — Delivery,Asset,Fixed Asset,Schedule L Line 10a,Delivery trucks
+1570,Computer Equipment,Asset,Fixed Asset,Schedule L Line 10a,Computers + servers
+1580,Leasehold Improvements,Asset,Fixed Asset,Schedule L Line 10a,Facility buildouts
+1590,Accumulated Depreciation,Asset,Accumulated Depreciation,Schedule L Line 10b,Total depreciation (contra)
+1700,Security Deposits,Asset,Other Asset,Schedule L Line 13,Lease/utility deposits
+1710,Patents and Intellectual Property,Asset,Intangible Asset,Schedule L Line 12,Patents owned (capitalized)
+1720,Capitalized Software (Internal Use),Asset,Intangible Asset,Schedule L Line 12,ERP/MRP software capitalized
+2010,Accounts Payable — Material Vendors,Liability,Current Liability,Schedule L Line 16,Raw material supplier invoices
+2020,Accounts Payable — Other,Liability,Current Liability,Schedule L Line 16,Other vendor invoices
+2100,Credit Card Payable,Liability,Current Liability,Schedule L Line 17,Credit card balance
+2200,Accrued Expenses,Liability,Current Liability,Schedule L Line 17,Accrued expenses
+2210,Accrued Salaries and Wages,Liability,Current Liability,Schedule L Line 17,Wages earned not yet paid
+2220,Accrued Vacation/PTO,Liability,Current Liability,Schedule L Line 17,Accrued PTO
+2230,Accrued Production Bonuses,Liability,Current Liability,Schedule L Line 17,Production-based bonuses earned
+2240,Accrued Warranty Liability,Liability,Current Liability,Schedule L Line 17,Estimated warranty claims (matching principle)
+2300,Payroll Liabilities,Liability,Current Liability,Schedule L Line 17,Withheld payroll taxes
+2310,Federal Income Tax Withheld,Liability,Current Liability,,Federal income tax withholding
+2320,FICA Withheld (Employee),Liability,Current Liability,,FICA employee
+2330,FICA Payable (Employer),Liability,Current Liability,,Employer FICA
+2340,State Income Tax Withheld,Liability,Current Liability,,State withholding
+2350,State Unemployment Tax,Liability,Current Liability,,SUI/SUTA
+2360,Federal Unemployment Tax,Liability,Current Liability,,FUTA
+2400,Sales Tax Payable,Liability,Current Liability,Schedule L Line 17,Sales tax collected (if direct sales)
+2410,Use Tax Payable,Liability,Current Liability,Schedule L Line 17,Use tax on out-of-state purchases
+2500,Income Tax Payable,Liability,Current Liability,Schedule L Line 17,Income tax owed
+2600,Notes Payable — Short-term,Liability,Current Liability,Schedule L Line 18,Short-term loans
+2610,Equipment Loans — Short-term,Liability,Current Liability,Schedule L Line 18,Equipment financing (current portion)
+2700,Customer Deposits,Liability,Current Liability,Schedule L Line 17,Customer deposits/progress payments
+2710,Deferred Revenue,Liability,Current Liability,Schedule L Line 17,Long-term contracts (% completion)
+2800,Notes Payable — Long-term,Liability,Long-term Liability,Schedule L Line 20,Long-term loans
+2810,Equipment Loans — Long-term,Liability,Long-term Liability,Schedule L Line 20,Equipment financing (long-term portion)
+2820,Mortgage Payable,Liability,Long-term Liability,Schedule L Line 20,Building mortgage
+3010,Common Stock,Equity,Common Stock,Schedule L Line 22,Par value
+3020,Additional Paid-in Capital,Equity,Additional Paid-in Capital,Schedule L Line 23,APIC
+3030,Retained Earnings,Equity,Retained Earnings,Schedule L Line 25,Retained profits
+3040,Distributions/Dividends,Equity,Distributions,Schedule M-2,Owner distributions
+3050,Owner's Capital,Equity,Owner's Equity,,Sole prop / LLC-single
+3060,Owner's Drawing,Equity,Owner's Equity,,Sole prop / LLC-single draws
+4010,Sales — Manufactured Products,Revenue,Product Revenue,Form 1120 Line 1a,Manufactured product sales
+4020,Sales — Custom Manufacturing,Revenue,Product Revenue,Form 1120 Line 1a,Custom orders/job-shop work
+4030,Sales — Spare Parts,Revenue,Product Revenue,Form 1120 Line 1a,Replacement parts sales
+4040,Sales — Service Contracts,Revenue,Service Revenue,Form 1120 Line 1a,Maintenance service contracts
+4050,Shipping Revenue,Revenue,Other Revenue,Form 1120 Line 1a,Shipping fees billed
+4090,Sales Returns and Allowances,Revenue,Product Revenue,Form 1120 Line 1b,Returns (contra)
+4095,Sales Discounts,Revenue,Product Revenue,Form 1120 Line 1b,Discounts (contra)
+5010,COGS — Direct Materials,COGS,Direct Materials,Form 1120 Line 2,Raw materials consumed
+5020,COGS — Direct Labor,COGS,Direct Labor,Form 1120 Line 2,Production worker wages (hourly tracked to product)
+5030,COGS — Manufacturing Overhead Applied,COGS,Manufacturing Overhead,Form 1120 Line 2,Allocated overhead
+5040,COGS — Subcontractor Services,COGS,Cost of Goods Sold,Form 1120 Line 2,Outsourced production
+5050,COGS — Freight In,COGS,Cost of Goods Sold,Form 1120 Line 2,Inbound freight on materials
+5060,Inventory Adjustments,COGS,Cost of Goods Sold,Form 1120 Line 2,Inventory shrinkage/write-offs
+5100,Manufacturing Overhead — Indirect Materials,COGS,Manufacturing Overhead,Form 1120 Line 2,Supplies used in production
+5110,Manufacturing Overhead — Indirect Labor,COGS,Manufacturing Overhead,Form 1120 Line 2,Supervisor/maintenance/QC wages
+5120,Manufacturing Overhead — Factory Rent,COGS,Manufacturing Overhead,Form 1120 Line 2,Production facility rent (allocated)
+5130,Manufacturing Overhead — Factory Utilities,COGS,Manufacturing Overhead,Form 1120 Line 2,Factory utilities
+5140,Manufacturing Overhead — Equipment Depreciation,COGS,Manufacturing Overhead,Form 1120 Line 2,Production equipment depreciation
+5150,Manufacturing Overhead — Maintenance,COGS,Manufacturing Overhead,Form 1120 Line 2,Equipment maintenance
+6010,Salaries and Wages — Sales,Expense,Salaries and Wages,Form 1120 Line 13,Sales staff wages
+6020,Salaries and Wages — Office/Admin,Expense,Salaries and Wages,Form 1120 Line 13,Office staff wages (NOT production)
+6030,Officer Compensation,Expense,Salaries and Wages,Form 1120 Line 12,Owner-employee W-2
+6040,Payroll Tax Expense — Office,Expense,Salaries and Wages,Form 1120 Line 17,Office payroll taxes
+6050,Employee Benefits,Expense,Salaries and Wages,Form 1120 Line 24,Health/dental/etc. (office)
+6100,Rent — Office,Expense,Rent,Form 1120 Line 16,Office space (separate from factory in 5120)
+6200,Utilities — Office,Expense,Utilities,Form 1120 Line 26,Office utilities
+6210,Telephone and Internet,Expense,Utilities,Form 1120 Line 26,Communications
+6300,Office Supplies,Expense,Office Expense,Form 1120 Line 26,Office supplies
+6310,Software and Subscriptions,Expense,Office Expense,Form 1120 Line 26,ERP/CRM/CAD software
+6320,Research and Development,Expense,Other Operating Expense,Form 1120 Line 26,R&D expenses (eligible for tax credit)
+6400,Professional Services,Expense,Professional Services,Form 1120 Line 26,Legal/accounting/consulting
+6410,Engineering Consulting,Expense,Professional Services,Form 1120 Line 26,External engineering services
+6500,Marketing and Advertising,Expense,Marketing,Form 1120 Line 22,Ads/trade shows
+6510,Trade Shows and Conferences,Expense,Marketing,Form 1120 Line 22,Industry trade shows
+6520,Product Catalogs and Brochures,Expense,Marketing,Form 1120 Line 22,Print materials
+6600,Travel,Expense,Travel and Meals,Form 1120 Line 26,Sales/customer travel
+6610,Meals — 50% Deductible,Expense,Travel and Meals,Form 1120 Line 26,Customer entertainment meals
+6700,Insurance — General Liability,Expense,Insurance,Form 1120 Line 18,GL insurance
+6710,Insurance — Workers' Comp,Expense,Insurance,Form 1120 Line 18,Workers' comp (high for manufacturing)
+6720,Insurance — Product Liability,Expense,Insurance,Form 1120 Line 18,Product liability coverage
+6730,Insurance — Property,Expense,Insurance,Form 1120 Line 18,Building + equipment property
+6740,Insurance — Cargo/Transit,Expense,Insurance,Form 1120 Line 18,Inbound/outbound shipment coverage
+6800,Bank Fees,Expense,Other Operating Expense,Form 1120 Line 26,Bank charges
+6810,Wire Transfer Fees,Expense,Other Operating Expense,Form 1120 Line 26,International wire fees (export)
+6820,Quality Control Supplies,Expense,Other Operating Expense,Form 1120 Line 26,QC test supplies (if not in COGS)
+6830,Regulatory Compliance,Expense,Other Operating Expense,Form 1120 Line 26,OSHA/EPA/FDA compliance costs
+6840,Patents and Trademarks Filing,Expense,Other Operating Expense,Form 1120 Line 26,IP filing fees
+6850,Depreciation Expense — Office,Expense,Depreciation,Form 1120 Line 20,Office equipment depreciation (factory in 5140)
+6900,Other Operating Expenses,Expense,Other Operating Expense,Form 1120 Line 26,Catch-all
+7010,Interest Income,Other_Income,Interest Income,Form 1120 Line 5,Bank interest
+7020,Other Income — Scrap Sales,Other_Income,Other Operating Expense,Form 1120 Line 10,Scrap material sales
+7100,Interest Expense,Other_Expense,Interest Expense,Form 1120 Line 18,Loan/equipment financing interest
+7200,Federal Income Tax Expense,Other_Expense,Tax Expense,Form 1120 Line 31,Federal tax
+7210,State Income Tax Expense,Other_Expense,Tax Expense,Form 1120 Line 17,State tax
+7220,State Franchise Tax,Other_Expense,Tax Expense,Form 1120 Line 17,Franchise tax
+7300,Loss on Sale of Assets,Other_Expense,Gain/Loss on Sale of Assets,Form 1120 Line 26,Equipment disposal loss

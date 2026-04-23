@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<!--
+================================================================================
+  AI ACCOUNTING TEMPLATE — SETUP WIZARD (Phase 6)
+================================================================================
+
+  PURPOSE:
+    Guide a new US SMB through ~15 onboarding questions and output:
+      1. _BUSINESS_CONFIG.json   — Valid per _BUSINESS_CONFIG.schema.json
+      2. ONBOARDING_CHECKLIST.md — 30 items, entity + state + industry-aware
+
+  FLOW:
+    Step 1 — Business Identity (legal name, entity type, industry)
+    Step 2 — Location & Tax Setup (state(s), fiscal year)
+    Step 3 — Operations (software, basis, approval thresholds)
+    Step 4 — Owner / Primary User
+    Step 5 — Compliance Snapshot (what's already done?)
+    Step 6 — Review → Download JSON + checklist
+
+  DRAFT PERSISTENCE:
+    localStorage['ai_acct_wizard_draft'] saves progress between refreshes.
+    "Start over" button clears it.
+
+  NEXT STEP (after wizard):
+    1. Save downloaded JSON as `_INSTANCES/{instance_id}/_BUSINESS_CONFIG.json`
+    2. Run AI agent with: "Render workspace from this config"
+    3. See NEW_BUSINESS_ONBOARDING_PROTOCOL.md for full AI-agent protocol.
+================================================================================
+-->
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Accounting — Setup Wizard</title>
+<script src="https://cdn.tailwindcss.com" onerror="window.__tw_cdn_failed=true"></script>
+<style>
+  * { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; }
+  .fade-in { animation: fadeIn 0.25s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .step-dot { width: 2rem; height: 2rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 600; }
+  .step-dot.active { background: #2563eb; color: #fff; box-shadow: 0 0 0 4px rgba(37,99,235,0.2); }
+  .step-dot.done { background: #10b981; color: #fff; }
+  .step-dot.pending { background: #e2e8f0; color: #64748b; }
+  .field-error { border-color: #dc2626 !important; background: #fef2f2; }
+  .field-error-msg { color: #dc2626; font-size: 0.75rem; margin-top: 0.25rem; }
+  pre.json-preview { max-height: 320px; overflow: auto; }
+</style>
+<style id="tw-fallback" media="not all">
+  body { background: #f8fafc; color: #1e293b; margin: 0; font-family: sans-serif; }
+  header { background: linear-gradient(90deg,#1d4ed8,#1e3a8a); color: #fff; padding: 1rem 1.5rem; }
+  main { max-width: 48rem; margin: 0 auto; padding: 1.5rem 1rem; }
+  button { padding: 0.5rem 1rem; border: 1px solid #cbd5e1; background: #fff; border-radius: 0.5rem; cursor: pointer; }
+  input, select, textarea { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 0.375rem; box-sizing: border-box; margin-bottom: 0.5rem; }
+  label { display: block; font-weight: 500; margin-top: 0.75rem; }
+  .hidden { display: none !important; }
+  .grid { display: grid; gap: 0.75rem; }
+  @media (min-width: 768px) { .md\:grid-cols-2 { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+<header class="bg-gradient-to-r from-blue-700 to-blue-900 text-white">
+  <div class="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
+    <div>
+      <h1 class="text-xl font-bold">🪄 AI Accounting — Setup Wizard</h1>
+      <p class="text-xs text-blue-200">Onboard your business trong 5 phút — 15 câu hỏi → config + checklist</p>
+    </div>
+    <button onclick="clearDraft()" class="text-xs bg-white/10 hover:bg-white/20 rounded-lg px-3 py-1">🗑️ Start over</button>
+  </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 py-8">
+
+  <!-- Step progress bar -->
+  <div class="mb-6 flex items-center gap-2 justify-center flex-wrap">
+    <div class="flex items-center gap-2" data-step="1"><div class="step-dot pending">1</div><span class="text-xs text-slate-600 hidden sm:inline">Identity</span></div>
+    <div class="h-px w-6 bg-slate-300"></div>
+    <div class="flex items-center gap-2" data-step="2"><div class="step-dot pending">2</div><span class="text-xs text-slate-600 hidden sm:inline">Location</span></div>
+    <div class="h-px w-6 bg-slate-300"></div>
+    <div class="flex items-center gap-2" data-step="3"><div class="step-dot pending">3</div><span class="text-xs text-slate-600 hidden sm:inline">Operations</span></div>
+    <div class="h-px w-6 bg-slate-300"></div>
+    <div class="flex items-center gap-2" data-step="4"><div class="step-dot pending">4</div><span class="text-xs text-slate-600 hidden sm:inline">Owner</span></div>
+    <div class="h-px w-6 bg-slate-300"></div>
+    <div class="flex items-center gap-2" data-step="5"><div class="step-dot pending">5</div><span class="text-xs text-slate-600 hidden sm:inline">Compliance</span></div>
+    <div class="h-px w-6 bg-slate-300"></div>
+    <div class="flex items-center gap-2" data-step="6"><div class="step-dot pending">6</div><span class="text-xs text-slate-600 hidden sm:inline">Review</span></div>
+  </div>
+
+  <!-- Step 1: Business Identity -->
+  <section id="step-1" class="step bg-white rounded-xl shadow-md p-6 border border-slate-200 fade-in">
+    <h2 class="text-xl font-bold text-slate-800 mb-1">🏢 Bước 1: Business Identity</h2>
+    <p class="text-sm text-slate-500 mb-5">Tên pháp lý, loại entity, ngành — cơ bản nhất.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-slate-700 mb-1">Legal name <span class="text-red-500">*</span></label>
+        <input id="f_legal_name" type="text" placeholder="Acme Consulting LLC" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+        <p class="text-xs text-slate-500 mt-1">Tên pháp lý đầy đủ (như trên Articles of Incorporation / Certificate of Formation).</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">DBA (optional)</label>
+        <input id="f_dba" type="text" placeholder="Acme Consulting" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+        <p class="text-xs text-slate-500 mt-1">"Doing Business As" — tên thương mại nếu khác legal name.</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">EIN (optional)</label>
+        <input id="f_ein" type="text" placeholder="XX-XXXXXXX" maxlength="10" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+        <p class="text-xs text-slate-500 mt-1">Format XX-XXXXXXX. Để trống nếu chưa có — wizard sẽ thêm vào checklist.</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Entity type <span class="text-red-500">*</span></label>
+        <select id="f_entity_type" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
+          <option value="">-- Chọn --</option>
+          <option value="C-Corp">C-Corporation</option>
+          <option value="S-Corp">S-Corporation</option>
+          <option value="LLC-single">LLC — Single-member</option>
+          <option value="LLC-multi">LLC — Multi-member</option>
+          <option value="Partnership">Partnership (GP/LP/LLP)</option>
+          <option value="Sole-Prop">Sole Proprietorship</option>
+        </select>
+        <p class="text-xs text-slate-500 mt-1">Quyết định tax form + owner-comp rules. Xem <code>_MODULES/entity/</code> để biết chi tiết.</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Date of incorporation (optional)</label>
+        <input id="f_date_of_incorporation" type="date" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Industry <span class="text-red-500">*</span></label>
+        <select id="f_industry" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
+          <option value="">-- Chọn --</option>
+          <option value="Service">Service / Consulting</option>
+          <option value="Retail">Retail (physical/online)</option>
+          <option value="Restaurant">Restaurant / Food & Beverage</option>
+          <option value="Manufacturing">Manufacturing</option>
+          <option value="SaaS">SaaS / Software</option>
+        </select>
+        <p class="text-xs text-slate-500 mt-1">Quyết định COA template. Xem <code>_TEMPLATES/COA/</code>.</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Industry subtype (optional)</label>
+        <input id="f_industry_subtype" type="text" placeholder="IT consulting, boutique retail, etc." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-between">
+      <button onclick="gotoStep(1)" disabled class="px-5 py-2 bg-slate-100 text-slate-400 rounded-lg text-sm cursor-not-allowed">← Back</button>
+      <button onclick="next(1)" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Next →</button>
+    </div>
+  </section>
+
+  <!-- Step 2: Location & Tax Setup -->
+  <section id="step-2" class="step hidden bg-white rounded-xl shadow-md p-6 border border-slate-200 fade-in">
+    <h2 class="text-xl font-bold text-slate-800 mb-1">📍 Bước 2: Location & Tax Setup</h2>
+    <p class="text-sm text-slate-500 mb-5">State(s) nơi hoạt động + fiscal year.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">State of incorporation</label>
+        <select id="f_state_of_incorporation" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
+          <option value="">-- Chọn (optional) --</option>
+        </select>
+        <p class="text-xs text-slate-500 mt-1">Nơi đăng ký entity. Thường khác state operation với DE C-Corps.</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">State of operation <span class="text-red-500">*</span></label>
+        <select id="f_state_of_operation" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
+          <option value="">-- Chọn --</option>
+        </select>
+        <p class="text-xs text-slate-500 mt-1">State chính nơi hoạt động hàng ngày (payroll, sales).</p>
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-slate-700 mb-1">Additional states (multi-state nexus)</label>
+        <input id="f_additional_states" type="text" placeholder="NY, TX, FL (comma-separated 2-letter codes)" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+        <p class="text-xs text-slate-500 mt-1">Nơi có nexus (employees, inventory, revenue threshold). Mỗi state thêm = thêm filing.</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">City (optional)</label>
+        <input id="f_city" type="text" placeholder="Los Angeles" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">ZIP code (optional)</label>
+        <input id="f_zip_code" type="text" placeholder="90001" maxlength="10" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+
+      <div class="md:col-span-2 border-t border-slate-100 pt-4 mt-2">
+        <div class="text-sm font-semibold text-slate-700 mb-2">Fiscal year</div>
+        <label class="flex items-start gap-2 text-sm">
+          <input id="f_is_calendar_year" type="checkbox" checked class="mt-1">
+          <span>Calendar year (Jan 1 – Dec 31) — <span class="text-slate-500">recommended cho hầu hết SMB</span></span>
+        </label>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Current FY year <span class="text-red-500">*</span></label>
+        <input id="f_fy_year" type="number" min="2020" max="2099" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+
+      <div id="custom-fy-range" class="hidden">
+        <label class="block text-sm font-medium text-slate-700 mb-1">FY start date</label>
+        <input id="f_fy_start" type="date" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+        <label class="block text-sm font-medium text-slate-700 mb-1 mt-2">FY end date</label>
+        <input id="f_fy_end" type="date" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-between">
+      <button onclick="gotoStep(1)" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm">← Back</button>
+      <button onclick="next(2)" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Next →</button>
+    </div>
+  </section>
+
+  <!-- Step 3: Operations -->
+  <section id="step-3" class="step hidden bg-white rounded-xl shadow-md p-6 border border-slate-200 fade-in">
+    <h2 class="text-xl font-bold text-slate-800 mb-1">⚙️ Bước 3: Operations</h2>
+    <p class="text-sm text-slate-500 mb-5">Software + basis + approval thresholds.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Accounting software <span class="text-red-500">*</span></label>
+        <select id="f_accounting_software" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
+          <option value="">-- Chọn --</option>
+          <option value="Excel">Excel</option>
+          <option value="Google Sheets">Google Sheets</option>
+          <option value="QuickBooks Online">QuickBooks Online</option>
+          <option value="QuickBooks Desktop">QuickBooks Desktop</option>
+          <option value="Xero">Xero</option>
+          <option value="NetSuite">NetSuite</option>
+          <option value="Wave">Wave</option>
+          <option value="Sage">Sage</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Accounting basis <span class="text-red-500">*</span></label>
+        <select id="f_accounting_basis" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
+          <option value="">-- Chọn --</option>
+          <option value="Accrual">Accrual (GAAP-compliant)</option>
+          <option value="Cash">Cash (revenue &lt; $27M only)</option>
+          <option value="Modified Cash">Modified Cash</option>
+        </select>
+        <p class="text-xs text-slate-500 mt-1">Most SMB default to Accrual. Cash OK nếu revenue nhỏ.</p>
+      </div>
+
+      <div class="md:col-span-2 border-t border-slate-100 pt-4 mt-2">
+        <div class="text-sm font-semibold text-slate-700 mb-2">Approval thresholds preset <span class="text-red-500">*</span></div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+          <label class="flex items-start gap-2 border border-slate-300 rounded-lg p-3 cursor-pointer hover:bg-blue-50">
+            <input type="radio" name="preset" value="Conservative" class="mt-1 preset-radio" checked>
+            <div>
+              <div class="font-medium text-sm">Conservative</div>
+              <div class="text-xs text-slate-500">$1K / $10K / $50K<br>CapEx $2,500</div>
+            </div>
+          </label>
+          <label class="flex items-start gap-2 border border-slate-300 rounded-lg p-3 cursor-pointer hover:bg-blue-50">
+            <input type="radio" name="preset" value="Moderate" class="mt-1 preset-radio">
+            <div>
+              <div class="font-medium text-sm">Moderate</div>
+              <div class="text-xs text-slate-500">$5K / $25K / $100K<br>CapEx $5,000</div>
+            </div>
+          </label>
+          <label class="flex items-start gap-2 border border-slate-300 rounded-lg p-3 cursor-pointer hover:bg-blue-50">
+            <input type="radio" name="preset" value="Aggressive" class="mt-1 preset-radio">
+            <div>
+              <div class="font-medium text-sm">Aggressive</div>
+              <div class="text-xs text-slate-500">$10K / $50K / $250K<br>CapEx $10,000</div>
+            </div>
+          </label>
+          <label class="flex items-start gap-2 border border-slate-300 rounded-lg p-3 cursor-pointer hover:bg-blue-50">
+            <input type="radio" name="preset" value="Custom" class="mt-1 preset-radio">
+            <div>
+              <div class="font-medium text-sm">Custom</div>
+              <div class="text-xs text-slate-500">Set your own</div>
+            </div>
+          </label>
+        </div>
+
+        <div id="custom-thresholds" class="hidden mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-50 p-3 rounded-lg">
+          <div>
+            <label class="block text-xs font-medium text-slate-700">Tier 1 max (Staff) USD</label>
+            <input id="f_tier_1_max" type="number" min="0" step="100" class="w-full border border-slate-300 rounded px-2 py-1 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700">Tier 2 max (Manager) USD</label>
+            <input id="f_tier_2_max" type="number" min="0" step="100" class="w-full border border-slate-300 rounded px-2 py-1 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700">Tier 3 max (CFO) USD</label>
+            <input id="f_tier_3_max" type="number" min="0" step="100" class="w-full border border-slate-300 rounded px-2 py-1 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700">Dual approval threshold USD</label>
+            <input id="f_dual_approval_threshold" type="number" min="0" step="100" class="w-full border border-slate-300 rounded px-2 py-1 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700">CapEx threshold USD</label>
+            <input id="f_capex_threshold" type="number" min="0" step="100" class="w-full border border-slate-300 rounded px-2 py-1 text-sm">
+          </div>
+        </div>
+      </div>
+
+      <div class="md:col-span-2 border-t border-slate-100 pt-4 mt-2">
+        <div class="text-sm font-semibold text-slate-700 mb-2">Chart of Accounts setup</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Size</label>
+            <select id="f_coa_size" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
+              <option value="Minimal">Minimal (30-40 accounts)</option>
+              <option value="Standard" selected>Standard (50-70 accounts)</option>
+              <option value="Extended">Extended (80-120 accounts)</option>
+            </select>
+          </div>
+          <div class="flex items-end">
+            <label class="flex items-center gap-2 text-sm pb-2">
+              <input id="f_qbo_numbering" type="checkbox" checked>
+              QBO-compatible numbering (4-5 digits)
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-between">
+      <button onclick="gotoStep(2)" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm">← Back</button>
+      <button onclick="next(3)" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Next →</button>
+    </div>
+  </section>
+
+  <!-- Step 4: Owner -->
+  <section id="step-4" class="step hidden bg-white rounded-xl shadow-md p-6 border border-slate-200 fade-in">
+    <h2 class="text-xl font-bold text-slate-800 mb-1">👤 Bước 4: Owner / Primary User</h2>
+    <p class="text-sm text-slate-500 mb-5">Người điền form này — sẽ hiển thị trong header + prompts.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Name <span class="text-red-500">*</span></label>
+        <input id="f_owner_name" type="text" placeholder="Jane Doe" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Email <span class="text-red-500">*</span></label>
+        <input id="f_owner_email" type="email" placeholder="owner@company.com" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Phone (optional)</label>
+        <input id="f_owner_phone" type="tel" placeholder="+1 (555) 123-4567" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Role <span class="text-red-500">*</span></label>
+        <select id="f_owner_role" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
+          <option value="Owner">Owner</option>
+          <option value="Co-Owner">Co-Owner</option>
+          <option value="CFO">CFO</option>
+          <option value="Controller">Controller</option>
+          <option value="Bookkeeper">Bookkeeper</option>
+          <option value="Office Manager">Office Manager</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Preferred language <span class="text-red-500">*</span></label>
+        <select id="f_preferred_language" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
+          <option value="en">English</option>
+          <option value="vi">Tiếng Việt</option>
+          <option value="vi-en" selected>Bilingual (vi + US accounting terms)</option>
+        </select>
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="flex items-start gap-2 text-sm">
+          <input id="f_is_owner_employee" type="checkbox" class="mt-1">
+          <span>Owner is also an employee (làm việc trong business — <strong>bắt buộc cho S-Corp reasonable comp</strong>)</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-between">
+      <button onclick="gotoStep(3)" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm">← Back</button>
+      <button onclick="next(4)" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Next →</button>
+    </div>
+  </section>
+
+  <!-- Step 5: Compliance Snapshot -->
+  <section id="step-5" class="step hidden bg-white rounded-xl shadow-md p-6 border border-slate-200 fade-in">
+    <h2 class="text-xl font-bold text-slate-800 mb-1">✅ Bước 5: Compliance Snapshot</h2>
+    <p class="text-sm text-slate-500 mb-5">Cái nào đã xong rồi? Tick vào. AI sẽ skip những cái này trong checklist.</p>
+
+    <div class="space-y-3">
+      <label class="flex items-start gap-2 text-sm"><input id="c_ein_obtained" type="checkbox" class="mt-1"><span><strong>EIN obtained</strong> (Form SS-4 filed với IRS)</span></label>
+      <label class="flex items-start gap-2 text-sm"><input id="c_boi_filed" type="checkbox" class="mt-1"><span><strong>BOI filed</strong> (FinCEN Beneficial Ownership Information — required cho most entities 2024+)</span></label>
+      <label class="flex items-start gap-2 text-sm"><input id="c_state_registration_complete" type="checkbox" class="mt-1"><span><strong>State registration complete</strong> (Articles of Incorporation / Certificate of Formation filed)</span></label>
+      <label class="flex items-start gap-2 text-sm"><input id="c_sales_tax_permit" type="checkbox" class="mt-1"><span><strong>Sales tax permit</strong> (nếu bán taxable goods/services)</span></label>
+      <label class="flex items-start gap-2 text-sm"><input id="c_workers_comp_insurance" type="checkbox" class="mt-1"><span><strong>Workers' comp insurance</strong> (if ≥1 W-2 employee, varies by state)</span></label>
+      <label class="flex items-start gap-2 text-sm"><input id="c_general_liability_insurance" type="checkbox" class="mt-1"><span><strong>General liability insurance</strong></span></label>
+      <label class="flex items-start gap-2 text-sm"><input id="c_business_license" type="checkbox" class="mt-1"><span><strong>Business license</strong> (city/county specific)</span></label>
+      <label class="flex items-start gap-2 text-sm"><input id="c_operating_agreement_or_bylaws" type="checkbox" class="mt-1"><span><strong>Operating Agreement (LLC) / Bylaws (Corp)</strong> signed</span></label>
+    </div>
+
+    <div class="mt-4">
+      <label class="block text-sm font-medium text-slate-700 mb-1">Payroll provider (nếu có employees)</label>
+      <select id="f_payroll_provider" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
+        <option value="">-- Chưa có / Not applicable --</option>
+        <option value="Manual">Manual (spreadsheet)</option>
+        <option value="Gusto">Gusto</option>
+        <option value="ADP">ADP</option>
+        <option value="Rippling">Rippling</option>
+        <option value="Paychex">Paychex</option>
+        <option value="QuickBooks Payroll">QuickBooks Payroll</option>
+        <option value="OnPay">OnPay</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="mt-6 flex justify-between">
+      <button onclick="gotoStep(4)" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm">← Back</button>
+      <button onclick="next(5)" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Review →</button>
+    </div>
+  </section>
+
+  <!-- Step 6: Review + Download -->
+  <section id="step-6" class="step hidden bg-white rounded-xl shadow-md p-6 border border-slate-200 fade-in">
+    <h2 class="text-xl font-bold text-slate-800 mb-1">📦 Bước 6: Review & Download</h2>
+    <p class="text-sm text-slate-500 mb-5">Kiểm tra lại rồi download 2 file.</p>
+
+    <div id="review-summary" class="mb-5 text-sm space-y-1 bg-slate-50 rounded-lg p-4 border border-slate-200"></div>
+
+    <details class="mb-5">
+      <summary class="cursor-pointer text-sm font-medium text-slate-700 hover:text-blue-700">👀 Preview _BUSINESS_CONFIG.json</summary>
+      <pre id="json-preview" class="json-preview mt-2 bg-slate-900 text-slate-100 text-xs p-4 rounded-lg overflow-x-auto"></pre>
+    </details>
+
+    <details class="mb-5">
+      <summary class="cursor-pointer text-sm font-medium text-slate-700 hover:text-blue-700">👀 Preview ONBOARDING_CHECKLIST.md</summary>
+      <pre id="checklist-preview" class="json-preview mt-2 bg-slate-50 text-slate-800 text-xs p-4 rounded-lg overflow-x-auto whitespace-pre-wrap"></pre>
+    </details>
+
+    <div class="bg-amber-50 border-l-4 border-amber-500 rounded p-4 mb-5 text-sm text-amber-900">
+      <strong>📋 Sau khi download:</strong>
+      <ol class="list-decimal list-inside mt-2 space-y-1">
+        <li>Tạo folder <code>_INSTANCES/{instance_id}/</code></li>
+        <li>Save JSON vào folder đó → rename thành <code>_BUSINESS_CONFIG.json</code></li>
+        <li>Save MD checklist vào cùng folder → <code>ONBOARDING_CHECKLIST.md</code></li>
+        <li>Chạy AI agent với lệnh: <em>"Render workspace from this instance config"</em></li>
+        <li>(Detail: xem <code>_CONFIG/NEW_BUSINESS_ONBOARDING_PROTOCOL.md</code>)</li>
+      </ol>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+      <button onclick="gotoStep(5)" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm">← Back</button>
+      <button onclick="downloadJSON()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">💾 Download JSON</button>
+      <button onclick="downloadChecklist()" class="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium">📋 Download Checklist</button>
+      <button onclick="copyJSON()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm">📋 Copy JSON</button>
+    </div>
+  </section>
+
+</main>
+
+<footer class="text-center py-6 text-xs text-slate-400">
+  AI Accounting Template • Setup Wizard • <a href="_BUSINESS_CONFIG.schema.json" class="hover:underline">Schema reference</a>
+</footer>
+
+<script>
+// ============================================================================
+// DATA — states, entity labels, preset values
+// ============================================================================
+const STATES = [
+  ['AL','Alabama'],['AK','Alaska'],['AZ','Arizona'],['AR','Arkansas'],['CA','California'],
+  ['CO','Colorado'],['CT','Connecticut'],['DE','Delaware'],['FL','Florida'],['GA','Georgia'],
+  ['HI','Hawaii'],['ID','Idaho'],['IL','Illinois'],['IN','Indiana'],['IA','Iowa'],
+  ['KS','Kansas'],['KY','Kentucky'],['LA','Louisiana'],['ME','Maine'],['MD','Maryland'],
+  ['MA','Massachusetts'],['MI','Michigan'],['MN','Minnesota'],['MS','Mississippi'],['MO','Missouri'],
+  ['MT','Montana'],['NE','Nebraska'],['NV','Nevada'],['NH','New Hampshire'],['NJ','New Jersey'],
+  ['NM','New Mexico'],['NY','New York'],['NC','North Carolina'],['ND','North Dakota'],['OH','Ohio'],
+  ['OK','Oklahoma'],['OR','Oregon'],['PA','Pennsylvania'],['RI','Rhode Island'],['SC','South Carolina'],
+  ['SD','South Dakota'],['TN','Tennessee'],['TX','Texas'],['UT','Utah'],['VT','Vermont'],
+  ['VA','Virginia'],['WA','Washington'],['WV','West Virginia'],['WI','Wisconsin'],['WY','Wyoming'],
+  ['DC','District of Columbia']
+];
+
+const PRESETS = {
+  Conservative: { tier_1_max: 1000, tier_2_max: 10000, tier_3_max: 50000, dual_approval_threshold: 10000, capex_threshold: 2500 },
+  Moderate:     { tier_1_max: 5000, tier_2_max: 25000, tier_3_max: 100000, dual_approval_threshold: 25000, capex_threshold: 5000 },
+  Aggressive:   { tier_1_max: 10000, tier_2_max: 50000, tier_3_max: 250000, dual_approval_threshold: 50000, capex_threshold: 10000 }
+};
+
+// 10 states with detailed modules — wizard can generate richer checklist for these.
+const DETAILED_STATES = ['CA','NY','TX','FL','DE','WA','IL','GA','NJ','MA'];
+const NO_INCOME_TAX_STATES = ['TX','FL','WA','NV','SD','WY','AK','TN','NH'];
+const STATE_ENTITY_TAX = {
+  CA: '$800 minimum franchise tax (all entities except Sole-Prop)',
+  NY: 'NYC corp tax (if NYC-based) + state income tax',
+  TX: 'Franchise/Margin tax (0.375%–0.75%, exempt if revenue < $2.47M)',
+  FL: 'Corporate income tax 5.5% (C-Corp only)',
+  DE: 'Franchise tax ($175–$200K depending on method)',
+  WA: 'B&O gross receipts tax (0.13%–3.3%) + Capital Gains 7%',
+  IL: 'Replacement Tax 1.5% (S-Corp/LLC) / 2.5% (C-Corp) + state income tax',
+  GA: 'Net Worth Tax ($10–$5,000)',
+  NJ: 'CBT 9% + 2.5% surtax',
+  MA: 'Corporate excise 8% + Net Worth $2.60/$1K + 4% Millionaire Tax'
+};
+
+// ============================================================================
+// STATE SELECT POPULATION + EVENT WIRING
+// ============================================================================
+function populateStateSelects() {
+  const opt = STATES.map(([c,n]) => `<option value="${c}">${c} — ${n}</option>`).join('');
+  document.getElementById('f_state_of_incorporation').insertAdjacentHTML('beforeend', opt);
+  document.getElementById('f_state_of_operation').insertAdjacentHTML('beforeend', opt);
+}
+populateStateSelects();
+
+// Default FY year to current
+document.getElementById('f_fy_year').value = new Date().getFullYear();
+
+// Toggle calendar-year vs custom FY
+document.getElementById('f_is_calendar_year').addEventListener('change', e => {
+  document.getElementById('custom-fy-range').classList.toggle('hidden', e.target.checked);
+});
+
+// Toggle custom thresholds
+document.querySelectorAll('.preset-radio').forEach(r => {
+  r.addEventListener('change', e => {
+    const isCustom = e.target.value === 'Custom';
+    document.getElementById('custom-thresholds').classList.toggle('hidden', !isCustom);
+    if (!isCustom) {
+      const p = PRESETS[e.target.value];
+      if (p) {
+        document.getElementById('f_tier_1_max').value = p.tier_1_max;
+        document.getElementById('f_tier_2_max').value = p.tier_2_max;
+        document.getElementById('f_tier_3_max').value = p.tier_3_max;
+        document.getElementById('f_dual_approval_threshold').value = p.dual_approval_threshold;
+        document.getElementById('f_capex_threshold').value = p.capex_threshold;
+      }
+    }
+  });
+});
+
+// EIN auto-format (XX-XXXXXXX)
+document.getElementById('f_ein').addEventListener('input', e => {
+  let v = e.target.value.replace(/\D/g, '');
+  if (v.length > 2) v = v.slice(0,2) + '-' + v.slice(2,9);
+  e.target.value = v;
+});
+
+// ============================================================================
+// NAVIGATION
+// ============================================================================
+let currentStep = 1;
+
+function updateProgressBar() {
+  document.querySelectorAll('[data-step]').forEach(el => {
+    const n = parseInt(el.getAttribute('data-step'));
+    const dot = el.querySelector('.step-dot');
+    dot.className = 'step-dot ' + (n < currentStep ? 'done' : n === currentStep ? 'active' : 'pending');
+    dot.textContent = n < currentStep ? '✓' : n;
+  });
+}
+
+function gotoStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.add('hidden'));
+  document.getElementById('step-' + n).classList.remove('hidden');
+  currentStep = n;
+  updateProgressBar();
+  window.scrollTo(0, 0);
+  saveDraft();
+  if (n === 6) renderReview();
+}
+
+function next(fromStep) {
+  if (!validateStep(fromStep)) return;
+  gotoStep(fromStep + 1);
+}
+
+// ============================================================================
+// VALIDATION
+// ============================================================================
+function markError(id, msg) {
+  const el = document.getElementById(id);
+  el.classList.add('field-error');
+  let msgEl = el.nextElementSibling;
+  if (!msgEl || !msgEl.classList.contains('field-error-msg')) {
+    msgEl = document.createElement('div');
+    msgEl.className = 'field-error-msg';
+    el.parentNode.insertBefore(msgEl, el.nextSibling);
+  }
+  msgEl.textContent = msg;
+}
+
+function clearErrors() {
+  document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+  document.querySelectorAll('.field-error-msg').forEach(el => el.remove());
+}
+
+function validateStep(n) {
+  clearErrors();
+  let ok = true;
+
+  if (n === 1) {
+    const name = document.getElementById('f_legal_name').value.trim();
+    if (name.length < 2) { markError('f_legal_name', 'Legal name ≥ 2 ký tự'); ok = false; }
+    if (!document.getElementById('f_entity_type').value) { markError('f_entity_type', 'Chọn entity type'); ok = false; }
+    if (!document.getElementById('f_industry').value) { markError('f_industry', 'Chọn industry'); ok = false; }
+    const ein = document.getElementById('f_ein').value.trim();
+    if (ein && !/^\d{2}-\d{7}$/.test(ein)) { markError('f_ein', 'Format EIN phải là XX-XXXXXXX'); ok = false; }
+  }
+  else if (n === 2) {
+    if (!document.getElementById('f_state_of_operation').value) { markError('f_state_of_operation', 'Chọn state of operation'); ok = false; }
+    const fy = parseInt(document.getElementById('f_fy_year').value);
+    if (!fy || fy < 2020 || fy > 2099) { markError('f_fy_year', 'FY year phải là 2020–2099'); ok = false; }
+    const zip = document.getElementById('f_zip_code').value.trim();
+    if (zip && !/^\d{5}(-\d{4})?$/.test(zip)) { markError('f_zip_code', 'ZIP format: 12345 hoặc 12345-6789'); ok = false; }
+    const addStates = document.getElementById('f_additional_states').value.trim();
+    if (addStates) {
+      const parts = addStates.split(/[,\s]+/).filter(Boolean);
+      const codes = STATES.map(s => s[0]);
+      for (const p of parts) {
+        if (!codes.includes(p.toUpperCase())) { markError('f_additional_states', `"${p}" không phải state code hợp lệ`); ok = false; break; }
+      }
+    }
+    if (!document.getElementById('f_is_calendar_year').checked) {
+      if (!document.getElementById('f_fy_start').value) { markError('f_fy_start', 'FY start required'); ok = false; }
+      if (!document.getElementById('f_fy_end').value) { markError('f_fy_end', 'FY end required'); ok = false; }
+    }
+  }
+  else if (n === 3) {
+    if (!document.getElementById('f_accounting_software').value) { markError('f_accounting_software', 'Chọn software'); ok = false; }
+    if (!document.getElementById('f_accounting_basis').value) { markError('f_accounting_basis', 'Chọn basis'); ok = false; }
+  }
+  else if (n === 4) {
+    if (document.getElementById('f_owner_name').value.trim().length < 2) { markError('f_owner_name', 'Name ≥ 2 ký tự'); ok = false; }
+    const email = document.getElementById('f_owner_email').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { markError('f_owner_email', 'Email không hợp lệ'); ok = false; }
+  }
+  return ok;
+}
+
+// ============================================================================
+// BUILD CONFIG OBJECT
+// ============================================================================
+function buildConfig() {
+  const v = id => document.getElementById(id).value.trim();
+  const chk = id => document.getElementById(id).checked;
+
+  const preset = document.querySelector('input[name="preset"]:checked').value;
+  const presetVals = preset === 'Custom'
+    ? {
+        tier_1_max: parseFloat(v('f_tier_1_max')) || 0,
+        tier_2_max: parseFloat(v('f_tier_2_max')) || 0,
+        tier_3_max: parseFloat(v('f_tier_3_max')) || 0,
+        dual_approval_threshold: parseFloat(v('f_dual_approval_threshold')) || 0,
+        capex_threshold: parseFloat(v('f_capex_threshold')) || 0,
+      }
+    : PRESETS[preset];
+
+  const isCal = chk('f_is_calendar_year');
+  const fyYear = parseInt(v('f_fy_year'));
+  const fy = {
+    year: fyYear,
+    start_date: isCal ? `${fyYear}-01-01` : v('f_fy_start'),
+    end_date: isCal ? `${fyYear}-12-31` : v('f_fy_end'),
+    is_calendar_year: isCal
+  };
+
+  const legalName = v('f_legal_name');
+  let instanceId = legalName.replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 50);
+  if (!instanceId) instanceId = 'Unnamed_Business';
+  if (instanceId.length < 3) instanceId = 'Business_' + instanceId;
+
+  const additionalStates = v('f_additional_states')
+    .split(/[,\s]+/).filter(Boolean).map(s => s.toUpperCase());
+
+  const industry = v('f_industry');
+
+  const cfg = {
+    schema_version: '1.0.0',
+    instance_id: instanceId,
+    last_updated: new Date().toISOString().slice(0, 10),
+
+    company: {
+      legal_name: legalName,
+      dba: v('f_dba') || null,
+      ein: v('f_ein') || null,
+      entity_type: v('f_entity_type'),
+      state_of_incorporation: v('f_state_of_incorporation') || null,
+      date_of_incorporation: v('f_date_of_incorporation') || null,
+      industry: industry,
+      industry_subtype: v('f_industry_subtype') || null
+    },
+
+    operations: {
+      state_of_operation: v('f_state_of_operation'),
+      additional_states: additionalStates,
+      city: v('f_city') || null,
+      zip_code: v('f_zip_code') || null,
+      accounting_software: v('f_accounting_software'),
+      accounting_basis: v('f_accounting_basis'),
+      base_currency: 'USD'
+    },
+
+    fiscal_year: fy,
+
+    owner: {
+      name: v('f_owner_name'),
+      email: v('f_owner_email'),
+      phone: v('f_owner_phone') || null,
+      role: v('f_owner_role'),
+      preferred_language: v('f_preferred_language'),
+      is_owner_employee: chk('f_is_owner_employee')
+    },
+
+    approval_thresholds: {
+      preset: preset,
+      ...presetVals
+    },
+
+    bank_accounts: [],
+    employees: [],
+    contractors: [],
+
+    compliance_status: {
+      ein_obtained: chk('c_ein_obtained'),
+      boi_filed: chk('c_boi_filed'),
+      boi_filed_date: null,
+      state_registration_complete: chk('c_state_registration_complete'),
+      sales_tax_permit: chk('c_sales_tax_permit'),
+      workers_comp_insurance: chk('c_workers_comp_insurance'),
+      general_liability_insurance: chk('c_general_liability_insurance'),
+      business_license: chk('c_business_license'),
+      operating_agreement_or_bylaws: chk('c_operating_agreement_or_bylaws'),
+      payroll_provider: v('f_payroll_provider') || null
+    },
+
+    chart_of_accounts: {
+      industry_template: industry,
+      file_path: `02_General_Ledger/Chart_of_Accounts/Chart_of_Accounts_FY${fyYear}.xlsx`,
+      size: v('f_coa_size'),
+      qbo_compatible_numbering: chk('f_qbo_numbering')
+    },
+
+    branding: {
+      logo_path: null,
+      primary_color_hex: null,
+      invoice_prefix: 'INV-'
+    }
+  };
+  return cfg;
+}
+
+// ============================================================================
+// CHECKLIST GENERATOR — entity + state + industry-aware
+// ============================================================================
+function buildChecklist(cfg) {
+  const entity = cfg.company.entity_type;
+  const state = cfg.operations.state_of_operation;
+  const stateName = (STATES.find(([c]) => c === state) || [state, state])[1];
+  const industry = cfg.company.industry;
+  const hasAdditionalStates = cfg.operations.additional_states.length > 0;
+  const cs = cfg.compliance_status;
+
+  const item = (done, text, detail) => `- [${done ? 'x' : ' '}] **${text}**${detail ? `  \n  ${detail}` : ''}`;
+
+  const isSoleProp = entity === 'Sole-Prop';
+  const isCorp = entity === 'C-Corp' || entity === 'S-Corp';
+  const isPassThrough = entity === 'S-Corp' || entity === 'LLC-single' || entity === 'LLC-multi' || entity === 'Partnership' || entity === 'Sole-Prop';
+  const isMultiMember = entity === 'LLC-multi' || entity === 'Partnership' || entity === 'C-Corp' || entity === 'S-Corp';
+  const retailOrRestaurant = industry === 'Retail' || industry === 'Restaurant';
+
+  const lines = [
+    `# 📋 Onboarding Checklist — ${cfg.company.legal_name}`,
+    '',
+    `**Entity:** ${entity} • **State:** ${stateName} (${state}) • **Industry:** ${industry}`,
+    `**Generated:** ${new Date().toISOString().slice(0, 10)} via Setup Wizard`,
+    '',
+    '> 📌 Tick ([x]) các items đã hoàn thành. Items đã tick ở Compliance Snapshot của wizard đã được pre-filled.',
+    '',
+    '---',
+    '',
+    '## 🇺🇸 Federal Compliance',
+    '',
+    item(cs.ein_obtained, 'Obtain EIN (Federal Employer Identification Number)',
+      'File Form SS-4 online at IRS.gov. Free, instant if done online. Required for all entities except Sole-Prop without employees.'),
+  ];
+
+  if (entity === 'S-Corp') {
+    lines.push(item(false, 'File Form 2553 (S-Corporation Election)',
+      'Must file within 2 months + 15 days of incorporation OR before the tax year begins. Late election relief available under Rev. Proc. 2013-30.'));
+  }
+  if (isCorp || entity === 'LLC-multi') {
+    lines.push(item(false, 'Determine tax classification election (LLC only)',
+      entity === 'LLC-multi' ? 'Default = Partnership. File Form 8832 if want C-Corp election, or Form 2553 for S-Corp election.' : 'N/A'));
+  }
+  if (!isSoleProp) {
+    lines.push(item(cs.boi_filed, 'File FinCEN BOI report (Beneficial Ownership Information)',
+      'Required for most entities formed after Jan 1, 2024 (within 30 days) and pre-existing entities (by Jan 1, 2025). Free filing at boiefiling.fincen.gov. Penalty $591/day for non-compliance.'));
+  }
+  lines.push(item(false, 'Open a business bank account (separate from personal)',
+    'Bring: EIN letter, formation docs, operating agreement/bylaws, owner ID. Never commingle — destroys liability protection + complicates accounting.'));
+  lines.push(item(false, 'Register for IRS online account (EFTPS)',
+    'eftps.gov — required for federal tax deposits (payroll, quarterly estimates, annual corp tax).'));
+
+  lines.push('', '---', '', `## 📍 ${stateName} State Compliance`, '');
+
+  lines.push(item(cs.state_registration_complete, `File formation documents with ${stateName} Secretary of State`,
+    `Articles of Incorporation (${isCorp ? 'Corp' : 'entity'}) or Certificate of Formation (LLC). Typical fee $50–$500.`));
+
+  if (DETAILED_STATES.includes(state)) {
+    lines.push(item(false, `Understand ${state} state-level taxes`,
+      `${STATE_ENTITY_TAX[state]}. See _MODULES/state/${state}.md for filing dates + forms.`));
+  } else {
+    lines.push(item(false, `Research ${state} state-level taxes`,
+      `Check franchise tax, income tax, entity-level tax requirements. Template has detailed modules for ${DETAILED_STATES.join(', ')} only — other states need manual lookup.`));
+  }
+
+  if (!NO_INCOME_TAX_STATES.includes(state)) {
+    lines.push(item(false, `Register with ${state} Department of Revenue (income tax)`,
+      `Withholding account for payroll (if hiring) + business income tax account.`));
+  } else {
+    lines.push(item(true, `${state} has no state income tax`,
+      `Skip state income tax registration. Still may need franchise/margin/B&O tax registration (see above).`));
+  }
+
+  if (retailOrRestaurant) {
+    lines.push(item(cs.sales_tax_permit, `Obtain ${state} sales tax permit`,
+      `Required for ${industry}. Register with state DOR. Usually free but may need bond.`));
+  } else {
+    lines.push(item(cs.sales_tax_permit, `Evaluate sales tax nexus (services are often exempt)`,
+      `Check ${state} rules for SaaS/digital products — some states tax these. See _MODULES/state/${state}.md.`));
+  }
+
+  lines.push(item(cs.business_license, `Obtain city/county business license`,
+    'Most municipalities require annual business license. Fee $50–$500. Check city + county separately.'));
+
+  if (hasAdditionalStates) {
+    lines.push(item(false, `Evaluate nexus in additional states: ${cfg.operations.additional_states.join(', ')}`,
+      'Each state = separate registration, filings, apportionment. Use state nexus thresholds (Wayfair: usually $100K or 200 transactions for sales tax).'));
+  }
+
+  lines.push('', '---', '', '## 📄 Legal Documents', '');
+
+  if (!isSoleProp) {
+    lines.push(item(cs.operating_agreement_or_bylaws,
+      entity === 'LLC-single' || entity === 'LLC-multi' ? 'Sign Operating Agreement' : isCorp ? 'Adopt Corporate Bylaws' : 'Sign Partnership Agreement',
+      'Critical governance doc. Single-member LLC still need it for liability protection. Multi-owner entities MUST have it to avoid default state rules.'));
+  }
+  if (isCorp) {
+    lines.push(item(false, 'Hold organizational meeting + issue stock',
+      'Document in minutes. Adopt bylaws, elect directors, issue initial stock certificates.'));
+  }
+  if (entity === 'LLC-multi' || entity === 'Partnership') {
+    lines.push(item(false, 'Document capital contributions + ownership percentages',
+      'Each member/partner: initial contribution $ and ownership %. Affects tax allocations and distributions.'));
+  }
+  lines.push(item(false, 'Federal + state required workplace posters (if hiring)',
+    'FLSA, FMLA, OSHA, EEO, state-specific posters. Free downloads at DOL.gov + state labor agency.'));
+
+  lines.push('', '---', '', '## 🛡️ Insurance', '');
+
+  lines.push(item(cs.general_liability_insurance, 'General Liability insurance',
+    'Recommended for all businesses. Typical $400–$1,500/year for small business. Many landlords/clients require it.'));
+  lines.push(item(cs.workers_comp_insurance, `Workers' comp insurance (if ≥1 employee)`,
+    state === 'TX' ? 'Texas: optional but strongly recommended. Non-subscriber status has legal risks.' :
+    state === 'FL' ? 'Florida: required at 4+ employees (1+ for construction).' :
+    'Required in most states at first employee. Get quotes from 2–3 carriers.'));
+  if (industry === 'Service' || industry === 'SaaS') {
+    lines.push(item(false, 'Professional Liability (E&O) insurance',
+      'Strongly recommended for service/SaaS/consulting. Covers negligence claims from clients.'));
+  }
+  if (industry === 'Restaurant' || industry === 'Retail') {
+    lines.push(item(false, 'Product Liability + Commercial Property insurance',
+      'Essential for inventory/product-based business. Covers damage to stock + injury from products.'));
+  }
+  if (industry === 'Restaurant') {
+    lines.push(item(false, 'Liquor liability insurance (if serving alcohol)',
+      'Required in most states for alcohol-serving establishments.'));
+  }
+
+  lines.push('', '---', '', '## 💰 Financial Setup', '');
+
+  lines.push(item(false, 'Set up Chart of Accounts',
+    `Template provides ${industry}-specific COA at \`_TEMPLATES/COA/COA_${industry}.csv\`. Size: ${cfg.chart_of_accounts.size}.`));
+  lines.push(item(false, 'Record opening balances (as of fiscal year start)',
+    `FY start: ${cfg.fiscal_year.start_date}. Capture cash, A/R, A/P, fixed assets, equity, loans.`));
+  lines.push(item(false, `Configure ${cfg.operations.accounting_software}`,
+    cfg.operations.accounting_software === 'Excel' || cfg.operations.accounting_software === 'Google Sheets'
+      ? 'Use templates at _TEMPLATES/Excel/. Download all 10 from master Index_workbook.'
+      : `Import COA, set fiscal year, enable ${cfg.operations.accounting_basis} basis.`));
+  lines.push(item(false, 'Create owner equity account + document capital contributions',
+    'Track initial and ongoing owner investments separately from retained earnings.'));
+
+  if (isPassThrough) {
+    lines.push(item(false, 'Set up quarterly estimated tax payment schedule',
+      'Pass-through entity → owners pay quarterly (Apr 15, Jun 15, Sep 15, Jan 15). Use IRS Form 1040-ES + state equivalent.'));
+  } else {
+    lines.push(item(false, 'Set up quarterly estimated tax payment schedule (Form 1120-W)',
+      'C-Corp pays entity-level quarterly estimates. Apr 15, Jun 15, Sep 15, Dec 15.'));
+  }
+
+  lines.push('', '---', '', '## 👥 Payroll Setup (if hiring W-2 employees)', '');
+
+  if (cs.payroll_provider) {
+    lines.push(item(true, `Payroll provider selected: ${cs.payroll_provider}`, ''));
+  } else {
+    lines.push(item(false, 'Choose payroll provider',
+      'Options: Gusto ($40+/mo), ADP, Rippling, QuickBooks Payroll. Manual spreadsheets risky — tax calc mistakes are common.'));
+  }
+  lines.push(item(false, 'Register for state unemployment insurance (SUI) account',
+    'Required in all 50 states before first paycheck. Rate varies by industry + experience.'));
+  lines.push(item(false, `Register for ${state} state withholding account`,
+    NO_INCOME_TAX_STATES.includes(state) ? 'Not applicable — no state income tax.' : 'Required for employee withholding.'));
+  if (entity === 'S-Corp' || (entity === 'C-Corp' && cfg.owner.is_owner_employee)) {
+    lines.push(item(false, 'Set owner reasonable compensation (W-2 salary)',
+      entity === 'S-Corp' ? '#1 IRS audit trigger for S-Corps. Research BLS data + industry benchmarks. See _MODULES/entity/S-Corp.md.' : 'C-Corp owners working in business must take W-2 compensation.'));
+  }
+
+  lines.push('', '---', '', '## 🔄 Ongoing Compliance (recurring)', '');
+
+  lines.push(item(false, 'Monthly bookkeeping + bank reconciliation',
+    'Close each month within 10 days. Use _TEMPLATES/Excel/BankReconciliation.md workflow.'));
+  lines.push(item(false, 'Quarterly estimated tax payments',
+    'Federal 1040-ES / 1120-W + state equivalents. Mark calendar: Apr 15, Jun 15, Sep 15, Jan 15.'));
+  if (!isSoleProp) {
+    lines.push(item(false, `Annual ${state} report filing`,
+      `Most states require annual report + fee. See _MODULES/state/${state}.md for exact date.`));
+  }
+  lines.push(item(false, 'Year-end closing + tax prep',
+    isPassThrough ? `Issue K-1s to members/shareholders by Mar 15. File ${entity === 'S-Corp' ? '1120-S' : entity === 'C-Corp' ? '1120' : '1065'}.` : 'File 1120 by Apr 15.'));
+  lines.push(item(false, 'File 1099-NEC for contractors paid ≥$600',
+    'Due Jan 31 each year. Collect W-9 BEFORE paying any contractor.'));
+
+  lines.push('', '---', '', '## 📚 Template Resources', '');
+  lines.push('- **Entity module:** `_MODULES/entity/' + entity + '.md` — deadlines, forms, owner comp rules');
+  lines.push('- **State module:** `_MODULES/state/' + state + '.md`' + (DETAILED_STATES.includes(state) ? ' — franchise tax, payroll quirks, filing dates' : ' — generic fallback (full module not yet built for this state)'));
+  lines.push('- **Industry guide:** `_TEMPLATES/COA/' + industry + '_Guide.md` — KPIs, GAAP nuances, common issues');
+  lines.push('- **Forms:** `_CORE/FORM_SCHEMA.md.template` — 18 form types for daily operations');
+  lines.push('- **Protocol:** `_CONFIG/NEW_BUSINESS_ONBOARDING_PROTOCOL.md` — AI agent workflow for rendering workspace');
+
+  lines.push('', '---', '', `_Generated by AI Accounting Template Setup Wizard • Schema v${cfg.schema_version}_`);
+
+  return lines.join('\n');
+}
+
+// ============================================================================
+// REVIEW RENDER
+// ============================================================================
+function renderReview() {
+  const cfg = buildConfig();
+  const stateName = (STATES.find(([c]) => c === cfg.operations.state_of_operation) || [cfg.operations.state_of_operation])[1];
+
+  const summary = `
+    <div><strong>Instance ID:</strong> <code>${cfg.instance_id}</code></div>
+    <div><strong>Company:</strong> ${cfg.company.legal_name}${cfg.company.dba ? ' (DBA: ' + cfg.company.dba + ')' : ''}</div>
+    <div><strong>Entity × Industry:</strong> ${cfg.company.entity_type} • ${cfg.company.industry}</div>
+    <div><strong>Location:</strong> ${stateName} (${cfg.operations.state_of_operation})${cfg.operations.additional_states.length ? ' + ' + cfg.operations.additional_states.join(', ') : ''}</div>
+    <div><strong>Fiscal year:</strong> ${cfg.fiscal_year.start_date} → ${cfg.fiscal_year.end_date}</div>
+    <div><strong>Software / Basis:</strong> ${cfg.operations.accounting_software} • ${cfg.operations.accounting_basis}</div>
+    <div><strong>Approval preset:</strong> ${cfg.approval_thresholds.preset} — Tier 1 $${cfg.approval_thresholds.tier_1_max.toLocaleString()} / Tier 2 $${cfg.approval_thresholds.tier_2_max.toLocaleString()} / Tier 3 $${cfg.approval_thresholds.tier_3_max.toLocaleString()}</div>
+    <div><strong>Owner:</strong> ${cfg.owner.name} (${cfg.owner.email}) • Role: ${cfg.owner.role} • Language: ${cfg.owner.preferred_language}</div>
+  `;
+  document.getElementById('review-summary').innerHTML = summary;
+  document.getElementById('json-preview').textContent = JSON.stringify(cfg, null, 2);
+  document.getElementById('checklist-preview').textContent = buildChecklist(cfg);
+}
+
+// ============================================================================
+// DOWNLOAD HELPERS
+// ============================================================================
+function downloadFile(filename, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function downloadJSON() {
+  const cfg = buildConfig();
+  downloadFile('_BUSINESS_CONFIG.json', JSON.stringify(cfg, null, 2), 'application/json');
+}
+
+function downloadChecklist() {
+  const cfg = buildConfig();
+  downloadFile('ONBOARDING_CHECKLIST.md', buildChecklist(cfg), 'text/markdown');
+}
+
+function copyJSON() {
+  const cfg = buildConfig();
+  const json = JSON.stringify(cfg, null, 2);
+  navigator.clipboard.writeText(json).then(() => alert('✅ Đã copy JSON!')).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = json; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    alert('✅ Đã copy JSON!');
+  });
+}
+
+// ============================================================================
+// DRAFT PERSISTENCE
+// ============================================================================
+const ALL_FIELD_IDS = ['f_legal_name','f_dba','f_ein','f_entity_type','f_date_of_incorporation','f_industry','f_industry_subtype',
+  'f_state_of_incorporation','f_state_of_operation','f_additional_states','f_city','f_zip_code','f_fy_year','f_fy_start','f_fy_end',
+  'f_accounting_software','f_accounting_basis','f_tier_1_max','f_tier_2_max','f_tier_3_max','f_dual_approval_threshold','f_capex_threshold','f_coa_size',
+  'f_owner_name','f_owner_email','f_owner_phone','f_owner_role','f_preferred_language','f_payroll_provider'];
+const ALL_CHECKBOX_IDS = ['f_is_calendar_year','f_qbo_numbering','f_is_owner_employee',
+  'c_ein_obtained','c_boi_filed','c_state_registration_complete','c_sales_tax_permit','c_workers_comp_insurance','c_general_liability_insurance','c_business_license','c_operating_agreement_or_bylaws'];
+
+function saveDraft() {
+  const draft = { step: currentStep };
+  ALL_FIELD_IDS.forEach(id => { draft[id] = document.getElementById(id)?.value || ''; });
+  ALL_CHECKBOX_IDS.forEach(id => { draft[id] = document.getElementById(id)?.checked || false; });
+  draft.preset = document.querySelector('input[name="preset"]:checked')?.value || 'Conservative';
+  localStorage.setItem('ai_acct_wizard_draft', JSON.stringify(draft));
+}
+
+function loadDraft() {
+  const raw = localStorage.getItem('ai_acct_wizard_draft');
+  if (!raw) return;
+  try {
+    const draft = JSON.parse(raw);
+    ALL_FIELD_IDS.forEach(id => { if (draft[id] !== undefined && document.getElementById(id)) document.getElementById(id).value = draft[id]; });
+    ALL_CHECKBOX_IDS.forEach(id => { if (draft[id] !== undefined && document.getElementById(id)) document.getElementById(id).checked = draft[id]; });
+    if (draft.preset) {
+      const r = document.querySelector(`input[name="preset"][value="${draft.preset}"]`);
+      if (r) { r.checked = true; r.dispatchEvent(new Event('change')); }
+    }
+    // Re-trigger calendar-year toggle
+    document.getElementById('f_is_calendar_year').dispatchEvent(new Event('change'));
+  } catch (_) { /* ignore */ }
+}
+
+function clearDraft() {
+  if (!confirm('Clear all entered data and start over?')) return;
+  localStorage.removeItem('ai_acct_wizard_draft');
+  location.reload();
+}
+
+// Auto-save every field change
+document.addEventListener('input', saveDraft);
+document.addEventListener('change', saveDraft);
+
+// ===== TAILWIND FALLBACK =====
+setTimeout(() => {
+  if (window.__tw_cdn_failed || !window.tailwind) {
+    const fb = document.getElementById('tw-fallback');
+    if (fb) fb.media = 'all';
+  }
+}, 3000);
+
+// ============================================================================
+// INIT
+// ============================================================================
+loadDraft();
+updateProgressBar();
+// Trigger preset radio to set initial threshold values
+document.querySelector('input[name="preset"]:checked').dispatchEvent(new Event('change'));
+</script>
+
+</body>
+</html>

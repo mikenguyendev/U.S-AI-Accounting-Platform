@@ -1,0 +1,341 @@
+# 🏢 COMPANY PROFILE — {{COMPANY.LEGAL_NAME}}
+
+> **Master profile document — nguồn dữ liệu chính (single source of truth) cho mọi nghiệp vụ kế toán. Mọi AI Agent session phải đọc file này TRƯỚC TIÊN.**
+>
+> **Note:** File này được render từ `_BUSINESS_CONFIG.json` + template. Để cập nhật thông tin, sửa config JSON, KHÔNG sửa file này trực tiếp.
+
+**Last Updated:** {{COMPUTED:TODAY|long_date}}
+**Maintained by:** {{OWNER.NAME}} ({{OWNER.EMAIL}})
+**Status:** Generated từ template v1.0.0
+
+---
+
+## 📋 FIRST-SETUP CHECKLIST STATUS
+
+| # | Item | Status | Ghi chú |
+|---|------|:------:|---------|
+| 1 | State of Operation | {{IF:OPERATIONS.STATE_OF_OPERATION EXISTS}}✅{{ENDIF}}{{IF:OPERATIONS.STATE_OF_OPERATION != EXISTS}}🟡{{ENDIF}} | {{FORMAT:OPERATIONS.STATE_OF_OPERATION|state_name}} ({{OPERATIONS.STATE_OF_OPERATION}}) |
+| 2 | Entity Type | {{IF:COMPANY.ENTITY_TYPE EXISTS}}✅{{ENDIF}} | {{COMPANY.ENTITY_TYPE}} |
+| 3 | Chart of Accounts | {{IF:CHART_OF_ACCOUNTS.FILE_PATH EXISTS}}🟡{{ENDIF}} | Industry preset: {{CHART_OF_ACCOUNTS.INDUSTRY_TEMPLATE}}, size: {{CHART_OF_ACCOUNTS.SIZE}} |
+| 4 | Opening Trial Balance FY{{FISCAL_YEAR.YEAR}} | 🟡 | Xem `02_General_Ledger/Opening_Trial_Balance_FY{{FISCAL_YEAR.YEAR}}.xlsx` |
+| 5 | Accounting Software | {{IF:OPERATIONS.ACCOUNTING_SOFTWARE EXISTS}}✅{{ENDIF}} | {{OPERATIONS.ACCOUNTING_SOFTWARE}} |
+| 6 | Bank Accounts & Credit Cards | {{IF:BANK_ACCOUNTS.0 EXISTS}}✅{{ENDIF}}{{IF:BANK_ACCOUNTS.0 != EXISTS}}🟡{{ENDIF}} | {{COMPUTED:BANK_ACCOUNTS_COUNT}} accounts configured |
+| 7 | Employees & Contractors | {{IF:EMPLOYEES.0 EXISTS}}✅{{ENDIF}}{{IF:EMPLOYEES.0 != EXISTS}}🟡{{ENDIF}} | {{COMPUTED:EMPLOYEES_COUNT}} employees / {{COMPUTED:CONTRACTORS_COUNT}} contractors |
+| 8 | Approval Thresholds | {{IF:APPROVAL_THRESHOLDS.PRESET EXISTS}}✅{{ENDIF}} | {{APPROVAL_THRESHOLDS.PRESET}} ({{FORMAT:APPROVAL_THRESHOLDS.TIER_1_MAX|currency}} / {{FORMAT:APPROVAL_THRESHOLDS.TIER_2_MAX|currency}} / {{FORMAT:APPROVAL_THRESHOLDS.TIER_3_MAX|currency}}) |
+
+**Legend:** ✅ Confirmed | 🟡 Confirmed but data pending | ❌ Not confirmed
+
+---
+
+## 1️⃣ LEGAL & TAX STRUCTURE
+
+### Entity
+- **Legal Name:** {{COMPANY.LEGAL_NAME}}
+- **DBA (if any):** {{COMPANY.DBA}}
+- **Entity Type:** **{{COMPANY.ENTITY_TYPE}}**
+- **Tax Form:** {{FORMAT:COMPANY.ENTITY_TYPE|tax_form}}
+- **EIN:** {{COMPANY.EIN}}
+- **State of Incorporation:** {{FORMAT:COMPANY.STATE_OF_INCORPORATION|state_name}} ({{COMPANY.STATE_OF_INCORPORATION}})
+- **Date of Incorporation:** {{COMPANY.DATE_OF_INCORPORATION}}
+- **Industry:** {{COMPANY.INDUSTRY}} — {{COMPANY.INDUSTRY_SUBTYPE}}
+
+### State of Operation: {{FORMAT:OPERATIONS.STATE_OF_OPERATION|state_name}} ({{OPERATIONS.STATE_OF_OPERATION}})
+
+{{INCLUDE:_MODULES/state/{{OPERATIONS.STATE_OF_OPERATION}}.md#tax-obligations}}
+
+### Federal Tax Obligations ({{COMPANY.ENTITY_TYPE}})
+
+{{INCLUDE:_MODULES/entity/{{COMPANY.ENTITY_TYPE}}.md#federal-obligations}}
+
+### Important Entity-Specific Rules
+
+{{INCLUDE:_MODULES/entity/{{COMPANY.ENTITY_TYPE}}.md#critical-rules}}
+
+---
+
+## 2️⃣ ACCOUNTING SYSTEM
+
+### Software
+- **Primary:** **{{OPERATIONS.ACCOUNTING_SOFTWARE}}**
+{{IF:OPERATIONS.ACCOUNTING_SOFTWARE IN ["Excel", "Google Sheets"]}}
+- **Future Migration Path:** Consider QuickBooks Online khi revenue >$500K hoặc headcount >5
+{{ENDIF}}
+
+{{IF:OPERATIONS.ACCOUNTING_SOFTWARE IN ["Excel", "Google Sheets"]}}
+### Implications of Spreadsheet-Based Accounting
+- ✅ Flexibility, low cost, audit-friendly
+- ⚠️ Higher risk of manual errors → cần rigorous double-check
+- ⚠️ No native multi-user support → single-controller access
+- ⚠️ Limited automation → monthly close sẽ tốn nhiều thời gian
+- 📋 **Required Templates:** GL, Journal Entries, Trial Balance, AP/AR Aging, Bank Reconciliation, P&L, Balance Sheet, Cash Flow (xem `_TEMPLATES/Excel/`)
+{{ENDIF}}
+
+{{IF:OPERATIONS.ACCOUNTING_SOFTWARE == "QuickBooks Online"}}
+### Implications of QuickBooks Online
+- ✅ Multi-user, cloud-based, native integrations với banks/payroll
+- ✅ Audit trail tự động
+- ⚠️ Subscription cost ongoing
+- ⚠️ Lock-in: data export limited
+{{ENDIF}}
+
+### Accounting Basis
+- **Basis:** **{{OPERATIONS.ACCOUNTING_BASIS}}**
+- **Fiscal Year:** {{IF:FISCAL_YEAR.IS_CALENDAR_YEAR == true}}Calendar Year{{ENDIF}}{{IF:FISCAL_YEAR.IS_CALENDAR_YEAR == false}}Custom Fiscal Year{{ENDIF}} ({{FORMAT:FISCAL_YEAR.START_DATE|long_date}} – {{FORMAT:FISCAL_YEAR.END_DATE|long_date}})
+
+---
+
+## 3️⃣ CHART OF ACCOUNTS (COA)
+
+### Status
+- **Industry Template:** {{CHART_OF_ACCOUNTS.INDUSTRY_TEMPLATE}}
+- **Size:** {{CHART_OF_ACCOUNTS.SIZE}}
+- **QBO-Compatible Numbering:** {{CHART_OF_ACCOUNTS.QBO_COMPATIBLE_NUMBERING}}
+- **File Location:** `{{CHART_OF_ACCOUNTS.FILE_PATH}}`
+
+### Account Ranges (US GAAP standard)
+| Range | Category |
+|-------|----------|
+| 1000–1999 | Assets (Cash, A/R, Prepaid, Fixed Assets) |
+| 2000–2999 | Liabilities (A/P, Accrued, Payroll, Taxes, Loans) |
+| 3000–3999 | Equity (Common Stock, APIC, Retained Earnings, Distributions) |
+| 4000–4999 | Revenue (Service Revenue / Product Revenue by line) |
+| 5000–5999 | Cost of Goods Sold / Cost of Services |
+| 6000–6999 | Operating Expenses (SG&A) |
+| 7000–7999 | Other Income / (Expense) |
+
+> **Industry-specific account details:** Xem `_MODULES/industry/{{COMPANY.INDUSTRY}}.md`
+
+---
+
+## 4️⃣ OPENING TRIAL BALANCE FY{{FISCAL_YEAR.YEAR}}
+
+### Status
+- **Opening Date:** {{FORMAT:FISCAL_YEAR.START_DATE|long_date}}
+- **File Location:** `02_General_Ledger/Opening_Trial_Balance_FY{{FISCAL_YEAR.YEAR}}.xlsx`
+
+### Required Information
+{{IF:COMPANY.ENTITY_TYPE IN ["S-Corp", "C-Corp"]}}
+- [ ] Initial capital contribution amount & date
+- [ ] Par value of common stock + number of shares authorized/issued
+- [ ] Any pre-existing assets/liabilities transferred into entity
+- [ ] Opening cash deposit amount
+{{ENDIF}}
+{{IF:COMPANY.ENTITY_TYPE IN ["LLC-single", "LLC-multi"]}}
+- [ ] Initial capital contribution per member
+- [ ] Member ownership percentages
+- [ ] Any contributed assets at fair market value
+- [ ] Operating Agreement terms cho profit/loss allocation
+{{ENDIF}}
+{{IF:COMPANY.ENTITY_TYPE == "Partnership"}}
+- [ ] Initial capital contribution per partner
+- [ ] Partnership Agreement terms cho profit/loss allocation
+- [ ] Guaranteed payments specifications
+{{ENDIF}}
+{{IF:COMPANY.ENTITY_TYPE == "Sole-Prop"}}
+- [ ] Owner equity opening balance
+- [ ] Any business assets at cost basis
+{{ENDIF}}
+
+---
+
+## 5️⃣ BANK ACCOUNTS & CREDIT CARDS
+
+{{IF:BANK_ACCOUNTS.0 EXISTS}}
+### Configured Accounts
+
+{{COMPUTED:BANK_ACCOUNTS_TABLE}}
+{{ENDIF}}
+
+{{IF:BANK_ACCOUNTS.0 != EXISTS}}
+### Status: 🟡 Not Yet Configured
+
+### Recommended Setup for {{COMPANY.ENTITY_TYPE}} ({{FORMAT:OPERATIONS.STATE_OF_OPERATION|state_name}})
+
+| Type | Purpose | Recommended Provider |
+|------|---------|----------------------|
+| Business Checking (Primary) | Operating cashflow, payroll | Chase Business / BofA / Mercury |
+| Business Savings | Tax reserves, emergency fund | Same as checking for integration |
+| Business Credit Card | Expenses, separation from personal | Chase Ink / Amex Business |
+| Payroll Account (Optional) | Dedicated payroll funding | Separate from operating for control |
+
+### Placeholder GL Accounts (to be populated when accounts opened)
+```
+1010  Cash — Operating Checking            [Bank: TBD] [Last 4: TBD]
+1020  Cash — Savings                       [Bank: TBD] [Last 4: TBD]
+1030  Cash — Payroll Account               [Bank: TBD] [Last 4: TBD]
+2110  Credit Card Payable — [Issuer TBD]   [Last 4: TBD]
+```
+{{ENDIF}}
+
+### ⚠️ Compliance Reminders
+{{IF:COMPANY.ENTITY_TYPE IN ["S-Corp", "C-Corp", "LLC-single", "LLC-multi", "Partnership"]}}
+- **CTA Beneficial Ownership Reporting** (FinCEN) — required for most corporations/LLCs
+- **Business banking mandatory** — do NOT mix với personal accounts (piercing the corporate veil risk)
+{{ENDIF}}
+{{IF:COMPANY.ENTITY_TYPE == "Sole-Prop"}}
+- Business banking RECOMMENDED dù không bắt buộc — giúp tracking và thuế dễ hơn
+{{ENDIF}}
+
+---
+
+## 6️⃣ EMPLOYEES & CONTRACTORS
+
+{{IF:EMPLOYEES.0 EXISTS}}
+### Active Employees ({{COMPUTED:EMPLOYEES_COUNT}})
+
+{{COMPUTED:EMPLOYEES_TABLE}}
+{{ENDIF}}
+
+{{IF:CONTRACTORS.0 EXISTS}}
+### Active Contractors ({{COMPUTED:CONTRACTORS_COUNT}})
+
+{{COMPUTED:CONTRACTORS_TABLE}}
+{{ENDIF}}
+
+{{IF:EMPLOYEES.0 != EXISTS}}
+{{IF:CONTRACTORS.0 != EXISTS}}
+### Status: 🟡 No People Configured Yet
+{{ENDIF}}
+{{ENDIF}}
+
+### Required Information
+
+**For Each W-2 Employee:**
+- Full legal name
+- SSN (last 4 digits sufficient for records; full SSN needed for payroll filings)
+- Address
+- Job title, hire date
+- Pay rate (hourly/salary) & pay frequency
+- W-4 filing status & withholding
+- {{OPERATIONS.STATE_OF_OPERATION}} state withholding form (xem `_MODULES/state/{{OPERATIONS.STATE_OF_OPERATION}}.md#withholding-form`)
+- Benefits elections (health, 401k, etc.)
+- I-9 completed within 3 days of hire
+
+**For Each 1099 Contractor:**
+- Legal name or business name
+- Tax ID (SSN for individuals, EIN for businesses)
+- Address
+- W-9 form on file
+- Payment terms & rate
+- Nature of services provided
+
+{{IF:OWNER.IS_OWNER_EMPLOYEE == true}}
+### ⚠️ Owner-Employee Special Consideration
+{{INCLUDE:_MODULES/entity/{{COMPANY.ENTITY_TYPE}}.md#owner-compensation}}
+{{ENDIF}}
+
+### Placeholder Folders
+```
+05_Payroll/Employees_Roster.xlsx          (auto-generated từ config)
+05_Payroll/Contractors_1099_Roster.xlsx   (auto-generated từ config)
+```
+
+---
+
+## 7️⃣ AUTHORIZATION MATRIX (Approval Thresholds)
+
+### Level: **{{APPROVAL_THRESHOLDS.PRESET}}**
+
+| Transaction Amount | Approver Required | Notes |
+|--------------------|-------------------|-------|
+| **< {{FORMAT:APPROVAL_THRESHOLDS.TIER_1_MAX|currency}}** | Staff Accountant / any authorized user | Routine operating expenses |
+| **{{FORMAT:APPROVAL_THRESHOLDS.TIER_1_MAX|currency}} – {{FORMAT:APPROVAL_THRESHOLDS.TIER_2_MAX|currency}}** | Manager / Controller | Requires receipt + justification |
+| **{{FORMAT:APPROVAL_THRESHOLDS.TIER_2_MAX|currency}} – {{FORMAT:APPROVAL_THRESHOLDS.TIER_3_MAX|currency}}** | CFO (or CEO if no CFO) | Requires supporting documentation + memo |
+| **> {{FORMAT:APPROVAL_THRESHOLDS.TIER_3_MAX|currency}}** | CEO / Board of Directors | Requires formal resolution for capital expenditures |
+
+### Additional Controls
+- **Dual Approval Required:**
+  - Wire transfers >{{FORMAT:APPROVAL_THRESHOLDS.DUAL_APPROVAL_THRESHOLD|currency}}
+  - New vendor setup (prevent fictitious vendors)
+  - Changes to Chart of Accounts
+  - Payroll changes (new hire, pay rate change, terminations)
+- **Capitalization threshold:** Items >{{FORMAT:APPROVAL_THRESHOLDS.CAPEX_THRESHOLD|currency}} cân nhắc CapEx thay vì expense
+- **Segregation of Duties:**
+  - Preparer ≠ Approver ≠ Recorder for any journal entry >{{FORMAT:APPROVAL_THRESHOLDS.TIER_1_MAX|currency}}
+  - Person who cuts checks ≠ person who reconciles bank
+- **Monthly Review:** Controller signs off on all JEs posted in the period before lock
+
+---
+
+## 8️⃣ FISCAL CALENDAR — FY{{FISCAL_YEAR.YEAR}}
+
+### Current Status (as of {{COMPUTED:TODAY|long_date}})
+- **Active Fiscal Year:** FY{{FISCAL_YEAR.YEAR}} ({{FORMAT:FISCAL_YEAR.START_DATE|long_date}} – {{FORMAT:FISCAL_YEAR.END_DATE|long_date}})
+- **Current Quarter:** {{COMPUTED:CURRENT_QUARTER}}
+- **Days into FY{{FISCAL_YEAR.YEAR}}:** {{COMPUTED:DAYS_INTO_FY}} / 365 ({{COMPUTED:FY_PROGRESS_PCT}} complete)
+
+### Upcoming Critical Deadlines
+
+**Federal:**
+{{INCLUDE:_MODULES/entity/{{COMPANY.ENTITY_TYPE}}.md#upcoming-deadlines}}
+
+**State ({{FORMAT:OPERATIONS.STATE_OF_OPERATION|state_name}}):**
+{{INCLUDE:_MODULES/state/{{OPERATIONS.STATE_OF_OPERATION}}.md#upcoming-deadlines}}
+
+---
+
+## 9️⃣ COMPLIANCE STATUS
+
+| Item | Status | Notes |
+|------|:------:|-------|
+| EIN Obtained | {{IF:COMPLIANCE_STATUS.EIN_OBTAINED == true}}✅{{ENDIF}}{{IF:COMPLIANCE_STATUS.EIN_OBTAINED == false}}❌{{ENDIF}} | {{COMPANY.EIN}} |
+| FinCEN BOI Filed | {{IF:COMPLIANCE_STATUS.BOI_FILED == true}}✅{{ENDIF}}{{IF:COMPLIANCE_STATUS.BOI_FILED == false}}❌{{ENDIF}}{{IF:COMPLIANCE_STATUS.BOI_FILED == null}}N/A{{ENDIF}} | {{COMPLIANCE_STATUS.BOI_FILED_DATE}} |
+| State Registration | {{IF:COMPLIANCE_STATUS.STATE_REGISTRATION_COMPLETE == true}}✅{{ENDIF}}{{IF:COMPLIANCE_STATUS.STATE_REGISTRATION_COMPLETE == false}}❌{{ENDIF}} | {{OPERATIONS.STATE_OF_OPERATION}} Secretary of State |
+| Sales Tax Permit | {{IF:COMPLIANCE_STATUS.SALES_TAX_PERMIT == true}}✅{{ENDIF}}{{IF:COMPLIANCE_STATUS.SALES_TAX_PERMIT == false}}❌{{ENDIF}}{{IF:COMPLIANCE_STATUS.SALES_TAX_PERMIT == null}}N/A{{ENDIF}} | Required nếu bán taxable goods/services |
+| Workers' Comp Insurance | {{IF:COMPLIANCE_STATUS.WORKERS_COMP_INSURANCE == true}}✅{{ENDIF}}{{IF:COMPLIANCE_STATUS.WORKERS_COMP_INSURANCE == false}}❌{{ENDIF}}{{IF:COMPLIANCE_STATUS.WORKERS_COMP_INSURANCE == null}}N/A{{ENDIF}} | Mandatory in most states once có employee |
+| General Liability Insurance | {{IF:COMPLIANCE_STATUS.GENERAL_LIABILITY_INSURANCE == true}}✅{{ENDIF}}{{IF:COMPLIANCE_STATUS.GENERAL_LIABILITY_INSURANCE == false}}❌{{ENDIF}} | Recommended for all businesses |
+| Business License | {{IF:COMPLIANCE_STATUS.BUSINESS_LICENSE == true}}✅{{ENDIF}}{{IF:COMPLIANCE_STATUS.BUSINESS_LICENSE == false}}❌{{ENDIF}} | City/County requirement |
+| Operating Agreement / Bylaws | {{IF:COMPLIANCE_STATUS.OPERATING_AGREEMENT_OR_BYLAWS == true}}✅{{ENDIF}}{{IF:COMPLIANCE_STATUS.OPERATING_AGREEMENT_OR_BYLAWS == false}}❌{{ENDIF}} | Internal governance |
+| Payroll Provider | {{COMPLIANCE_STATUS.PAYROLL_PROVIDER}} | Manual / Gusto / ADP / Rippling / etc. |
+
+---
+
+## 🔟 NEXT ACTION ITEMS
+
+{{IF:COMPLIANCE_STATUS.EIN_OBTAINED == false}}
+- 🔴 **Apply for EIN** (Form SS-4) — required cho mọi business activity
+{{ENDIF}}
+{{IF:COMPLIANCE_STATUS.BOI_FILED == false}}
+- 🔴 **File FinCEN BOI Report** — 90-day deadline từ ngày formation
+{{ENDIF}}
+{{IF:COMPLIANCE_STATUS.STATE_REGISTRATION_COMPLETE == false}}
+- 🔴 **Complete state registration** với {{OPERATIONS.STATE_OF_OPERATION}} Secretary of State
+{{ENDIF}}
+{{IF:BANK_ACCOUNTS.0 != EXISTS}}
+- 🟡 **Open business bank accounts** (checking + credit card minimum)
+{{ENDIF}}
+{{IF:CHART_OF_ACCOUNTS.FILE_PATH != EXISTS}}
+- 🟡 **Generate Chart of Accounts** từ industry template `_TEMPLATES/COA/COA_{{COMPANY.INDUSTRY}}.xlsx`
+{{ENDIF}}
+{{IF:EMPLOYEES.0 != EXISTS}}
+{{IF:OWNER.IS_OWNER_EMPLOYEE == true}}
+- 🟡 **Document employee roster** — bắt đầu với owner-employee
+{{ENDIF}}
+{{ENDIF}}
+
+---
+
+## 🔗 RELATED DOCUMENTS
+
+- [`README.md`](./README.md) — Workspace overview
+- [`AI_AGENT_MEMORY.md`](./AI_AGENT_MEMORY.md) — Quick context for AI sessions
+- [`USE_CASES_GUIDE.md`](./USE_CASES_GUIDE.md) — 20 common use cases
+- [`_BUSINESS_CONFIG.json`](./_BUSINESS_CONFIG.json) — Master config (edit this to update profile)
+- [`_MODULES/entity/{{COMPANY.ENTITY_TYPE}}.md`](../../_MODULES/entity/{{COMPANY.ENTITY_TYPE}}.md) — Entity rules
+- [`_MODULES/state/{{OPERATIONS.STATE_OF_OPERATION}}.md`](../../_MODULES/state/{{OPERATIONS.STATE_OF_OPERATION}}.md) — State rules
+
+---
+
+## 📝 CHANGE LOG
+
+| Date | Change | By |
+|------|--------|-----|
+| {{COMPUTED:TODAY|iso_date}} | Profile generated từ template | AI Accounting Controller |
+
+---
+
+> **⚠️ Reminder:** Thông tin trong file này là **confidential business data**. Do not share outside authorized personnel. For complex tax decisions (especially {{COMPANY.ENTITY_TYPE}}-specific rules, {{OPERATIONS.STATE_OF_OPERATION}} state tax optimization, or multi-state nexus issues), **consult a licensed CPA**.
+
+**Prepared by:** AI Accounting Controller — {{COMPANY.LEGAL_NAME}}
+**For:** {{OWNER.NAME}} ({{OWNER.EMAIL}})
+**Generated from template:** AI Accounting Template v1.0.0 by mikenguyen.dev@gmail.com

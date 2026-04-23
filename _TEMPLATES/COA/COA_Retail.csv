@@ -1,0 +1,101 @@
+Account_Number,Account_Name,Account_Type,Account_Subtype,Tax_Line,Description
+1010,Cash — Operating Checking,Asset,Current Asset,Schedule L Line 1,Primary business checking
+1020,Cash — Savings,Asset,Current Asset,Schedule L Line 1,Tax reserves
+1030,Cash — Payroll,Asset,Current Asset,Schedule L Line 1,Payroll funding
+1040,Petty Cash,Asset,Current Asset,Schedule L Line 1,Cash drawer/store float
+1050,Cash — Merchant Account (Pending),Asset,Current Asset,Schedule L Line 1,Stripe/Square pending settlement
+1100,Accounts Receivable,Asset,Current Asset,Schedule L Line 2a,Wholesale customer invoices
+1110,AR — Allowance for Doubtful Accounts,Asset,Current Asset,Schedule L Line 2b,Bad debt allowance
+1200,Inventory — Merchandise,Asset,Current Asset,Schedule L Line 3,Goods held for sale
+1210,Inventory — In Transit,Asset,Current Asset,Schedule L Line 3,Inventory ordered but not received
+1220,Inventory — Returns/Damages,Asset,Current Asset,Schedule L Line 3,Returned/damaged stock awaiting disposition
+1230,Inventory — Reserve for Obsolescence,Asset,Current Asset,Schedule L Line 3,Allowance for obsolete inventory (contra)
+1300,Prepaid Expenses,Asset,Current Asset,Schedule L Line 6,General prepaid
+1310,Prepaid Insurance,Asset,Current Asset,Schedule L Line 6,Insurance premiums prepaid
+1320,Prepaid Rent,Asset,Current Asset,Schedule L Line 6,Store rent prepaid
+1330,Prepaid Inventory Deposits,Asset,Current Asset,Schedule L Line 6,Vendor deposits for upcoming inventory
+1500,Furniture and Fixtures — Store,Asset,Fixed Asset,Schedule L Line 10a,Display cases/shelving
+1510,Equipment — POS Systems,Asset,Fixed Asset,Schedule L Line 10a,Point-of-sale terminals
+1520,Equipment — Office,Asset,Fixed Asset,Schedule L Line 10a,Office equipment
+1530,Vehicles — Delivery,Asset,Fixed Asset,Schedule L Line 10a,Delivery trucks/vans
+1540,Leasehold Improvements,Asset,Fixed Asset,Schedule L Line 10a,Store buildouts
+1590,Accumulated Depreciation,Asset,Accumulated Depreciation,Schedule L Line 10b,Total depreciation (contra)
+1700,Security Deposits,Asset,Other Asset,Schedule L Line 13,Lease security deposits
+2010,Accounts Payable,Liability,Current Liability,Schedule L Line 16,Vendor invoices outstanding
+2020,Accounts Payable — Inventory Vendors,Liability,Current Liability,Schedule L Line 16,Inventory supplier invoices (separate tracking)
+2100,Credit Card Payable — Operating,Liability,Current Liability,Schedule L Line 17,Operating credit card
+2110,Credit Card Payable — Inventory,Liability,Current Liability,Schedule L Line 17,Inventory purchasing card
+2200,Accrued Expenses,Liability,Current Liability,Schedule L Line 17,Accrued expenses
+2210,Accrued Salaries and Wages,Liability,Current Liability,Schedule L Line 17,Wages earned not yet paid
+2220,Accrued Vacation/PTO,Liability,Current Liability,Schedule L Line 17,Accrued PTO
+2300,Payroll Liabilities,Liability,Current Liability,Schedule L Line 17,Withheld payroll taxes
+2310,Federal Income Tax Withheld,Liability,Current Liability,,Federal income tax pending Form 941
+2320,FICA Withheld (Employee),Liability,Current Liability,,FICA employee portion
+2330,FICA Payable (Employer),Liability,Current Liability,,Employer FICA match
+2340,State Income Tax Withheld,Liability,Current Liability,,State withholding pending
+2350,State Unemployment Tax,Liability,Current Liability,,SUI/SUTA pending
+2360,Federal Unemployment Tax (FUTA),Liability,Current Liability,,FUTA pending
+2400,Sales Tax Payable,Liability,Current Liability,Schedule L Line 17,Sales tax collected from customers
+2410,Sales Tax Payable — State,Liability,Current Liability,,State portion of sales tax
+2420,Sales Tax Payable — Local/County,Liability,Current Liability,,Local sales tax (CA cities/counties)
+2500,Income Tax Payable,Liability,Current Liability,Schedule L Line 17,Federal/state income tax owed
+2600,Notes Payable — Short-term,Liability,Current Liability,Schedule L Line 18,Short-term loans
+2700,Customer Deposits,Liability,Current Liability,Schedule L Line 17,Customer deposits/layaway
+2710,Gift Cards Outstanding,Liability,Current Liability,Schedule L Line 17,Unredeemed gift card balance
+2720,Loyalty/Rewards Liability,Liability,Current Liability,Schedule L Line 17,Outstanding loyalty rewards
+2800,Notes Payable — Long-term,Liability,Long-term Liability,Schedule L Line 20,Long-term loans
+3010,Common Stock,Equity,Common Stock,Schedule L Line 22,Par value of stock
+3020,Additional Paid-in Capital,Equity,Additional Paid-in Capital,Schedule L Line 23,Capital contributed above par
+3030,Retained Earnings,Equity,Retained Earnings,Schedule L Line 25,Accumulated retained profits
+3040,Distributions/Dividends,Equity,Distributions,Schedule M-2,Owner distributions
+3050,Owner's Capital,Equity,Owner's Equity,,Sole prop / LLC-single
+3060,Owner's Drawing,Equity,Owner's Equity,,Sole prop / LLC-single draws
+4010,Sales — Retail,Revenue,Product Revenue,Form 1120 Line 1a,In-store retail sales
+4020,Sales — Online/E-commerce,Revenue,Product Revenue,Form 1120 Line 1a,Online sales (Shopify/Amazon/own site)
+4030,Sales — Wholesale,Revenue,Product Revenue,Form 1120 Line 1a,B2B/wholesale sales
+4040,Sales — Gift Cards Redeemed,Revenue,Product Revenue,Form 1120 Line 1a,Gift card redemption (recognize on use)
+4050,Shipping Revenue,Revenue,Other Revenue,Form 1120 Line 1a,Shipping fees charged to customers
+4090,Sales Returns and Allowances,Revenue,Product Revenue,Form 1120 Line 1b,Customer returns/refunds (contra-revenue)
+4095,Sales Discounts,Revenue,Product Revenue,Form 1120 Line 1b,Promotional discounts (contra-revenue)
+5010,Cost of Goods Sold,COGS,Cost of Goods Sold,Form 1120 Line 2,COGS for items sold
+5020,Freight In (Shipping Inbound),COGS,Cost of Goods Sold,Form 1120 Line 2,Inbound shipping included in inventory cost
+5030,Inventory Adjustments — Shrinkage,COGS,Cost of Goods Sold,Form 1120 Line 2,Loss to theft/damage/error
+5040,Inventory Write-downs,COGS,Cost of Goods Sold,Form 1120 Line 2,Obsolete inventory write-offs
+5050,Shipping Costs (Outbound),COGS,Cost of Goods Sold,Form 1120 Line 2,Cost to ship to customers
+6010,Salaries and Wages — Store,Expense,Salaries and Wages,Form 1120 Line 13,Store staff wages
+6020,Salaries and Wages — Office,Expense,Salaries and Wages,Form 1120 Line 13,Back-office staff wages
+6030,Officer Compensation,Expense,Salaries and Wages,Form 1120 Line 12,Owner-employee W-2
+6040,Payroll Tax Expense,Expense,Salaries and Wages,Form 1120 Line 17,Employer payroll taxes
+6050,Employee Benefits — Health,Expense,Salaries and Wages,Form 1120 Line 24,Health insurance premiums
+6060,Employee Discount Expense,Expense,Other Operating Expense,Form 1120 Line 26,Employee merchandise discount
+6100,Rent — Store/Retail Space,Expense,Rent,Form 1120 Line 16,Retail location rent
+6110,Rent — Warehouse,Expense,Rent,Form 1120 Line 16,Warehouse rent
+6200,Utilities,Expense,Utilities,Form 1120 Line 26,Electricity/water/etc.
+6210,Telephone and Internet,Expense,Utilities,Form 1120 Line 26,Communications
+6300,Office Supplies,Expense,Office Expense,Form 1120 Line 26,Office supplies
+6310,Software and Subscriptions,Expense,Office Expense,Form 1120 Line 26,POS/inventory software
+6320,Store Supplies,Expense,Office Expense,Form 1120 Line 26,Bags/receipts/cleaning
+6400,Professional Services,Expense,Professional Services,Form 1120 Line 26,Legal/accounting/consulting
+6500,Marketing and Advertising,Expense,Marketing,Form 1120 Line 22,Ads/campaigns/SEO
+6510,Promotional Materials,Expense,Marketing,Form 1120 Line 22,Print/displays/signage
+6520,E-commerce Platform Fees,Expense,Marketing,Form 1120 Line 22,Shopify/Amazon platform fees
+6600,Travel,Expense,Travel and Meals,Form 1120 Line 26,Buying trips/trade shows
+6610,Meals — 50% Deductible,Expense,Travel and Meals,Form 1120 Line 26,Business meals
+6700,Insurance — General Liability,Expense,Insurance,Form 1120 Line 18,GL insurance
+6710,Insurance — Workers' Comp,Expense,Insurance,Form 1120 Line 18,Workers' comp
+6720,Insurance — Property/Inventory,Expense,Insurance,Form 1120 Line 18,Property + inventory coverage
+6730,Insurance — Liability/Theft,Expense,Insurance,Form 1120 Line 18,Theft/crime coverage
+6800,Bank Fees,Expense,Other Operating Expense,Form 1120 Line 26,Bank charges
+6810,Credit Card Processing Fees,Expense,Other Operating Expense,Form 1120 Line 26,Merchant processing fees
+6820,POS System Fees,Expense,Other Operating Expense,Form 1120 Line 26,POS subscription fees
+6830,Repairs and Maintenance,Expense,Other Operating Expense,Form 1120 Line 8,Store/equipment repairs
+6840,Cleaning and Janitorial,Expense,Other Operating Expense,Form 1120 Line 26,Cleaning services
+6850,Depreciation Expense,Expense,Depreciation,Form 1120 Line 20,Annual depreciation
+6900,Other Operating Expenses,Expense,Other Operating Expense,Form 1120 Line 26,Catch-all
+7010,Interest Income,Other_Income,Interest Income,Form 1120 Line 5,Bank interest earned
+7020,Other Income,Other_Income,Other Operating Expense,Form 1120 Line 10,Misc income (vendor rebates etc.)
+7100,Interest Expense,Other_Expense,Interest Expense,Form 1120 Line 18,Loan interest
+7200,Federal Income Tax Expense,Other_Expense,Tax Expense,Form 1120 Line 31,Federal corporate tax
+7210,State Income Tax Expense,Other_Expense,Tax Expense,Form 1120 Line 17,State corporate tax
+7220,State Franchise Tax,Other_Expense,Tax Expense,Form 1120 Line 17,Franchise tax
+7300,Loss on Sale of Assets,Other_Expense,Gain/Loss on Sale of Assets,Form 1120 Line 26,Asset disposal loss

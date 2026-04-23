@@ -1,0 +1,67 @@
+Section,Line_Item,Current_Period,YTD,Prior_Year_Same_Period,Notes
+HEADER,Company Name,,,,
+HEADER,Statement of Cash Flows (Indirect Method),,,,
+HEADER,For Period Ended: [Date],,,,
+,,,,,
+OPERATING,CASH FLOWS FROM OPERATING ACTIVITIES,,,,
+OPERATING,Net Income (from P&L),,,,Starting point indirect method
+,,,,,
+ADJUSTMENTS,Adjustments to reconcile Net Income to Cash from Operations:,,,,
+ADJUSTMENTS,Depreciation Expense,,,,Add back (non-cash)
+ADJUSTMENTS,Amortization Expense,,,,Add back (non-cash)
+ADJUSTMENTS,Stock-Based Compensation,,,,Add back (non-cash)
+ADJUSTMENTS,Bad Debt Expense / Provision,,,,Add back (non-cash)
+ADJUSTMENTS,(Gain)/Loss on Sale of Assets,,,,Reverse — investing activity
+,,,,,
+WORKING_CAPITAL,Changes in Working Capital:,,,,
+WORKING_CAPITAL,(Increase)/Decrease in Accounts Receivable,,,,
+WORKING_CAPITAL,(Increase)/Decrease in Inventory,,,,
+WORKING_CAPITAL,(Increase)/Decrease in Prepaid Expenses,,,,
+WORKING_CAPITAL,(Increase)/Decrease in Other Current Assets,,,,
+WORKING_CAPITAL,Increase/(Decrease) in Accounts Payable,,,,
+WORKING_CAPITAL,Increase/(Decrease) in Accrued Expenses,,,,
+WORKING_CAPITAL,Increase/(Decrease) in Sales Tax Payable,,,,
+WORKING_CAPITAL,Increase/(Decrease) in Income Tax Payable,,,,
+WORKING_CAPITAL,Increase/(Decrease) in Deferred Revenue,,,,
+WORKING_CAPITAL,Increase/(Decrease) in Customer Deposits,,,,
+,,,,,
+SUBTOTAL,NET CASH PROVIDED BY (USED IN) OPERATING ACTIVITIES,,,,=SUM
+,,,,,
+INVESTING,CASH FLOWS FROM INVESTING ACTIVITIES,,,,
+INVESTING,Purchase of Property and Equipment (CapEx),,,,
+INVESTING,Proceeds from Sale of Equipment,,,,
+INVESTING,Purchase of Investments,,,,
+INVESTING,Proceeds from Sale of Investments,,,,
+INVESTING,Acquisition of Business,,,,
+INVESTING,Capitalized Software Development Costs,,,,If SaaS
+,,,,,
+SUBTOTAL,NET CASH PROVIDED BY (USED IN) INVESTING ACTIVITIES,,,,=SUM
+,,,,,
+FINANCING,CASH FLOWS FROM FINANCING ACTIVITIES,,,,
+FINANCING,Proceeds from Issuance of Stock (Equity Capital),,,,
+FINANCING,Proceeds from Long-term Debt,,,,
+FINANCING,Repayment of Long-term Debt,,,,
+FINANCING,Proceeds from Short-term Borrowings,,,,
+FINANCING,Repayment of Short-term Borrowings,,,,
+FINANCING,Distributions to Shareholders / Dividends Paid,,,,
+FINANCING,Repurchase of Common Stock (Treasury),,,,
+FINANCING,Proceeds from Convertible Notes / SAFEs,,,,If startup
+,,,,,
+SUBTOTAL,NET CASH PROVIDED BY (USED IN) FINANCING ACTIVITIES,,,,=SUM
+,,,,,
+RECONCILIATION,RECONCILIATION,,,,
+RECONCILIATION,Net Increase (Decrease) in Cash,,,,=Operating + Investing + Financing
+RECONCILIATION,Cash and Cash Equivalents - Beginning of Period,,,,
+RECONCILIATION,CASH AND CASH EQUIVALENTS - END OF PERIOD,,,,
+,,,,,
+VERIFICATION,Per Balance Sheet (current period cash),,,,
+VERIFICATION,Per Cash Flow Statement (calculated),,,,
+VERIFICATION,DIFFERENCE,,,,=should be $0.00
+,,,,,
+SUPPLEMENTAL,SUPPLEMENTAL DISCLOSURES,,,,
+SUPPLEMENTAL,Cash paid for Interest,,,,
+SUPPLEMENTAL,Cash paid for Income Taxes,,,,
+SUPPLEMENTAL,Non-cash Investing/Financing:,,,,
+SUPPLEMENTAL,- Equipment acquired through capital lease,,,,
+SUPPLEMENTAL,- Stock issued for acquisition,,,,
+SUPPLEMENTAL,- Conversion of debt to equity,,,,

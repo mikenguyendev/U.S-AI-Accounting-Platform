@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<!--
+================================================================================
+  AI ACCOUNTING TEMPLATE — TASK FORM (v2.1 — Config-driven, Minimal flow)
+================================================================================
+
+  PURPOSE:
+    Generic, plug-and-play accounting task form. Header, prompts, and footer
+    auto-populate from `_BUSINESS_CONFIG.json`. Works for ANY US SMB.
+
+  PHILOSOPHY: 2-CLICK RULE
+    Click 1: Chọn loại nghiệp vụ
+    Click 2: Upload ảnh (hoặc quick-fill nếu không có ảnh)
+    Done. AI xử lý phần còn lại.
+
+  CONFIG LOADING (checked in order):
+    1. ?config=<path>                     ← URL param (highest priority)
+    2. localStorage['ai_acct_config_path']← Remembered from picker
+    3. ./_BUSINESS_CONFIG.json            ← Sibling file
+    4. ./_CONFIG/_BUSINESS_CONFIG.json    ← Active instance
+    5. ./_CONFIG/_BUSINESS_CONFIG.example.json ← Fallback demo
+    6. Modal file picker                  ← If all fetches fail (file:// CORS)
+
+  PLACEHOLDER SYNTAX (in prompt strings):
+    {{COMPANY.NAME}}         ← config.company.legal_name
+    {{COMPANY.ENTITY_TYPE}}  ← config.company.entity_type
+    {{STATE.CODE}}           ← config.operations.state_of_operation
+    {{STATE.NAME}}           ← full state name
+    {{OWNER.NAME}}           ← config.owner.name
+    {{OWNER.ROLE}}           ← config.owner.role
+    {{FY.YEAR}} / {{FY.LABEL}}
+    {{APPROVAL.TIER1_MAX}} … TIER3_MAX, DUAL, CAPEX
+    {{INDUSTRY}}             ← config.company.industry
+    {{BASE_CURRENCY}}        ← config.operations.base_currency (default USD)
+
+  AI RESPONSE PROTOCOL — When user pastes prompt from this form:
+    Phase 1 — EXTRACT: OCR image (if provided) → parse structured data
+    Phase 2 — CONFIRM: Show extracted data in table, ask "Proceed? (Y/N)"
+    Phase 3 — EXECUTE: (only after user confirms) Post JE, save file, update trackers
+    Phase 4 — REPORT: Short summary — max 5 lines, include file link
+    Phase 5 — FLAG: Any violations (approval threshold, entity rules, state rules)
+
+  RELATED DOCS:
+    - _CORE/FORM_SCHEMA.md.template     ← Full form schema
+    - _CORE/AI_AGENT_MEMORY.md.template ← AI context
+    - _CONFIG/_BUSINESS_CONFIG.schema.json ← Config field reference
+================================================================================
+-->
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Accounting — Task Form</title>
+<script src="https://cdn.tailwindcss.com" onerror="window.__tw_cdn_failed=true"></script>
+<style>
+  * { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; }
+  .fade-in { animation: fadeIn 0.2s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .task-btn { transition: all 0.15s; }
+  .task-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+  .dropzone { transition: all 0.2s; }
+  .dropzone.dragover { background: #dbeafe; border-color: #2563eb; }
+  details[open] summary .chev { transform: rotate(90deg); }
+  .chev { transition: transform 0.2s; display: inline-block; }
+  .pulse-btn { animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(37,99,235,0.4); } 50% { box-shadow: 0 0 0 8px rgba(37,99,235,0); } }
+  .cfg-banner { background: #fef3c7; border-left: 4px solid #f59e0b; }
+  .cfg-banner.error { background: #fee2e2; border-left-color: #dc2626; }
+  .modal-backdrop { background: rgba(15,23,42,0.6); }
+  .modal-panel { max-width: 480px; width: 92%; }
+</style>
+<style id="tw-fallback" media="not all">
+  /* Critical fallback when Tailwind CDN is unreachable. Enabled by detector below. */
+  body { background: #f8fafc; color: #1e293b; margin: 0; }
+  header { background: linear-gradient(90deg,#1d4ed8,#1e3a8a); color: #fff; padding: 1rem 1.5rem; }
+  header h1 { margin: 0 0 0.25rem; font-size: 1.1rem; }
+  main { max-width: 64rem; margin: 0 auto; padding: 1.5rem 1rem; }
+  button, .task-btn { padding: 0.5rem 1rem; border: 1px solid #cbd5e1; background: #fff; border-radius: 0.5rem; cursor: pointer; }
+  .bg-white { background: #fff; }
+  section { margin-bottom: 1.5rem; }
+  input, textarea, select { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 0.375rem; box-sizing: border-box; }
+  .grid { display: grid; gap: 0.75rem; }
+  @media (min-width: 768px) { .grid-cols-1 { grid-template-columns: 1fr; } .md\:grid-cols-2 { grid-template-columns: 1fr 1fr; } .md\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); } }
+  .hidden { display: none !important; }
+  details { background: #fff; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.75rem 1rem; }
+</style>
+</head>
+<body class="bg-gradient-to-b from-slate-50 to-slate-100 min-h-screen">
+
+<!-- HEADER -->
+<header class="bg-gradient-to-r from-blue-700 to-blue-900 text-white">
+  <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div>
+      <h1 class="text-lg font-bold">🏢 <span data-cfg="company.name">Loading…</span></h1>
+      <p class="text-xs text-blue-200">Accounting Task Form — Tối giản tối đa</p>
+    </div>
+    <div class="text-right text-xs flex items-center gap-3">
+      <div>
+        <div>👤 <span data-cfg="owner.role">—</span></div>
+        <div class="text-blue-200" id="today-date"></div>
+        <div class="text-blue-200" data-cfg="summary">—</div>
+      </div>
+      <button onclick="openConfigModal()" title="Switch config" class="bg-white/10 hover:bg-white/20 rounded-lg px-2 py-1 text-xs">⚙️</button>
+    </div>
+  </div>
+  <!-- Config status banner (only shown on warning/error) -->
+  <div id="cfg-banner" class="hidden text-sm"></div>
+</header>
+
+<main class="max-w-5xl mx-auto px-4 py-6">
+
+  <!-- ===== DASHBOARD ===== -->
+  <section id="dashboard" class="fade-in">
+
+    <!-- Welcome -->
+    <div class="bg-white rounded-xl shadow-sm p-5 mb-5 border border-slate-200">
+      <div class="flex items-start gap-3">
+        <div class="text-3xl">👋</div>
+        <div>
+          <h2 class="text-lg font-bold text-slate-800">Chào <span data-cfg="owner.role">bạn</span>!</h2>
+          <p class="text-sm text-slate-600 mt-1">Chọn việc → Upload ảnh → Tôi xử lý phần còn lại.</p>
+          <p class="text-xs text-slate-400 mt-1">Nếu thiếu thông tin, tôi sẽ hỏi. Sau đó báo kết quả.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAILY TASKS -->
+    <div class="mb-6">
+      <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3 px-1">📌 Hàng ngày — Chỉ cần chụp ảnh</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+        <button onclick="openPhoto('vendor-invoice')" class="task-btn bg-white border border-slate-200 rounded-xl p-4 text-left flex items-center gap-3">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl">📥</div>
+          <div class="flex-1">
+            <div class="font-semibold text-slate-800">Ghi nhận Hóa đơn đến</div>
+            <div class="text-xs text-slate-500 mt-0.5">📷 Chụp ảnh hóa đơn từ vendor</div>
+          </div>
+          <div class="text-blue-600 text-xl">›</div>
+        </button>
+
+        <button onclick="openPhoto('expense')" class="task-btn bg-white border border-slate-200 rounded-xl p-4 text-left flex items-center gap-3">
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-2xl">💳</div>
+          <div class="flex-1">
+            <div class="font-semibold text-slate-800">Chi phí lẻ</div>
+            <div class="text-xs text-slate-500 mt-0.5">📷 Chụp receipt (CC, petty cash)</div>
+          </div>
+          <div class="text-blue-600 text-xl">›</div>
+        </button>
+
+        <button onclick="openPhoto('deposit')" class="task-btn bg-white border border-slate-200 rounded-xl p-4 text-left flex items-center gap-3">
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-2xl">💵</div>
+          <div class="flex-1">
+            <div class="font-semibold text-slate-800">Thu tiền vào</div>
+            <div class="text-xs text-slate-500 mt-0.5">📷 Chụp check/deposit slip</div>
+          </div>
+          <div class="text-blue-600 text-xl">›</div>
+        </button>
+
+        <button onclick="openPhoto('bank-statement')" class="task-btn bg-white border border-slate-200 rounded-xl p-4 text-left flex items-center gap-3">
+          <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center text-2xl">🏦</div>
+          <div class="flex-1">
+            <div class="font-semibold text-slate-800">Đối soát Bank</div>
+            <div class="text-xs text-slate-500 mt-0.5">📷 Upload sao kê (PDF/ảnh)</div>
+          </div>
+          <div class="text-blue-600 text-xl">›</div>
+        </button>
+
+        <button onclick="openPhoto('w9')" class="task-btn bg-white border border-slate-200 rounded-xl p-4 text-left flex items-center gap-3">
+          <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center text-2xl">📄</div>
+          <div class="flex-1">
+            <div class="font-semibold text-slate-800">Setup Contractor (W-9)</div>
+            <div class="text-xs text-slate-500 mt-0.5">📷 Chụp form W-9</div>
+          </div>
+          <div class="text-blue-600 text-xl">›</div>
+        </button>
+
+        <button onclick="openPhoto('w4')" class="task-btn bg-white border border-slate-200 rounded-xl p-4 text-left flex items-center gap-3">
+          <div class="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center text-2xl">👤</div>
+          <div class="flex-1">
+            <div class="font-semibold text-slate-800">Employee mới (W-4)</div>
+            <div class="text-xs text-slate-500 mt-0.5">📷 Chụp W-4 + state withholding form</div>
+          </div>
+          <div class="text-blue-600 text-xl">›</div>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- REPORTS & REQUESTS -->
+    <div class="mb-6">
+      <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3 px-1">📊 Báo cáo & Yêu cầu — 1 click</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+        <button onclick="quickRequest('monthly-close')" class="task-btn bg-white border border-slate-200 rounded-xl p-4 text-left">
+          <div class="text-2xl mb-1">📅</div>
+          <div class="font-semibold text-slate-800 text-sm">Đóng sổ cuối tháng</div>
+          <div class="text-xs text-slate-500 mt-0.5">Full month-end close package</div>
+        </button>
+
+        <button onclick="quickRequest('financial-report')" class="task-btn bg-white border border-slate-200 rounded-xl p-4 text-left">
+          <div class="text-2xl mb-1">📈</div>
+          <div class="font-semibold text-slate-800 text-sm">Báo cáo tài chính</div>
+          <div class="text-xs text-slate-500 mt-0.5">P&amp;L, Balance Sheet, Cash Flow</div>
+        </button>
+
+        <button onclick="quickRequest('aging-report')" class="task-btn bg-white border border-slate-200 rounded-xl p-4 text-left">
+          <div class="text-2xl mb-1">📋</div>
+          <div class="font-semibold text-slate-800 text-sm">Aging Report</div>
+          <div class="text-xs text-slate-500 mt-0.5">AR/AP tuổi nợ</div>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- ADVANCED / NEEDS INPUT -->
+    <details class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
+      <summary class="p-4 cursor-pointer font-semibold text-slate-700 flex items-center gap-2">
+        <span class="chev">▸</span>
+        <span>⚙️ Nghiệp vụ cần nhập liệu (không có ảnh)</span>
+      </summary>
+      <div class="px-4 pb-4 border-t border-slate-100 pt-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <button onclick="openForm('customer-invoice')" class="text-left p-3 rounded-lg hover:bg-slate-50 border border-slate-200">
+            <div class="font-medium text-sm">📤 Xuất Hóa đơn cho KH</div>
+            <div class="text-xs text-slate-500">Customer Invoice</div>
+          </button>
+          <button onclick="openForm('journal-entry')" class="text-left p-3 rounded-lg hover:bg-slate-50 border border-slate-200">
+            <div class="font-medium text-sm">📓 Journal Entry thủ công</div>
+            <div class="text-xs text-slate-500">Manual JE</div>
+          </button>
+          <button onclick="openForm('payroll-run')" class="text-left p-3 rounded-lg hover:bg-slate-50 border border-slate-200">
+            <div class="font-medium text-sm">💰 Chạy Payroll</div>
+            <div class="text-xs text-slate-500">Pay period processing</div>
+          </button>
+          <button onclick="openForm('owner-comp')" class="text-left p-3 rounded-lg hover:bg-slate-50 border border-slate-200">
+            <div class="font-medium text-sm">⚠️ Owner Compensation</div>
+            <div class="text-xs text-slate-500">Entity-specific rules</div>
+          </button>
+          <button onclick="openForm('estimated-tax')" class="text-left p-3 rounded-lg hover:bg-slate-50 border border-slate-200">
+            <div class="font-medium text-sm">🏛️ Estimated Tax</div>
+            <div class="text-xs text-slate-500">Quarterly tax payment</div>
+          </button>
+          <button onclick="openForm('variance')" class="text-left p-3 rounded-lg hover:bg-slate-50 border border-slate-200">
+            <div class="font-medium text-sm">📊 Variance Analysis</div>
+            <div class="text-xs text-slate-500">Budget vs Actual</div>
+          </button>
+          <button onclick="openForm('wire-transfer')" class="text-left p-3 rounded-lg hover:bg-slate-50 border border-slate-200">
+            <div class="font-medium text-sm">💸 Wire Transfer &gt; threshold</div>
+            <div class="text-xs text-slate-500">Dual approval required</div>
+          </button>
+          <button onclick="openForm('adjusting-entry')" class="text-left p-3 rounded-lg hover:bg-slate-50 border border-slate-200">
+            <div class="font-medium text-sm">✏️ Adjusting Entry</div>
+            <div class="text-xs text-slate-500">Period-end adjustments</div>
+          </button>
+        </div>
+      </div>
+    </details>
+
+  </section>
+
+  <!-- ===== PHOTO UPLOAD VIEW ===== -->
+  <section id="photo-view" class="hidden fade-in">
+    <button onclick="backToDashboard()" class="mb-4 text-blue-600 hover:underline text-sm">← Quay lại</button>
+    <div class="bg-white rounded-xl shadow-md p-6 border border-slate-200">
+      <div id="photo-header" class="mb-5 pb-4 border-b border-slate-100"></div>
+
+      <div id="dropzone" class="dropzone border-2 border-dashed border-slate-300 rounded-xl p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50" onclick="document.getElementById('file-input').click()">
+        <div class="text-5xl mb-3">📷</div>
+        <div class="font-semibold text-slate-700 mb-1">Click hoặc kéo ảnh vào đây</div>
+        <div class="text-xs text-slate-500">PNG, JPG, PDF (có thể nhiều file)</div>
+        <input type="file" id="file-input" accept="image/*,.pdf" multiple hidden>
+      </div>
+
+      <div id="preview" class="hidden mt-4"></div>
+
+      <div class="mt-5">
+        <label class="block text-sm font-medium text-slate-700 mb-1">Ghi chú thêm <span class="text-slate-400 font-normal">(tùy chọn)</span></label>
+        <textarea id="photo-note" rows="2" placeholder="VD: Hóa đơn điện Q2, payment đã trả bằng Chase CC..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+      </div>
+
+      <div class="mt-5 flex gap-2">
+        <button onclick="backToDashboard()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded-lg text-sm font-medium">Hủy</button>
+        <button id="send-btn" onclick="sendPhotoTask()" disabled class="flex-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white py-3 rounded-lg text-sm font-medium px-8">📋 Gửi cho AI</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FORM VIEW (advanced) ===== -->
+  <section id="form-view" class="hidden fade-in">
+    <button onclick="backToDashboard()" class="mb-4 text-blue-600 hover:underline text-sm">← Quay lại</button>
+    <div class="bg-white rounded-xl shadow-md p-6 border border-slate-200">
+      <div id="form-header" class="mb-5 pb-4 border-b border-slate-100"></div>
+      <form id="task-form" onsubmit="submitForm(event)" class="space-y-4"></form>
+    </div>
+  </section>
+
+  <!-- ===== CONFIRMATION VIEW ===== -->
+  <section id="confirm-view" class="hidden fade-in">
+    <div class="bg-white rounded-xl shadow-md p-6 border border-green-200">
+      <div class="text-center mb-5">
+        <div class="text-5xl mb-2">✅</div>
+        <h2 class="text-xl font-bold text-slate-800">Đã sẵn sàng gửi cho AI!</h2>
+      </div>
+
+      <div class="bg-blue-50 border-l-4 border-blue-500 rounded p-4 mb-4">
+        <div class="text-sm font-semibold text-blue-900 mb-2">📋 3 bước tiếp theo:</div>
+        <ol class="text-sm text-blue-900 space-y-1 list-decimal list-inside">
+          <li>Prompt đã copy vào clipboard (<strong>Ctrl+V</strong> để paste)</li>
+          <li id="attach-step">Mở chat với AI Accounting Controller</li>
+          <li>Paste + gửi → AI sẽ xác nhận data rồi xử lý</li>
+        </ol>
+      </div>
+
+      <details class="mb-4">
+        <summary class="cursor-pointer text-sm font-medium text-slate-600 hover:text-slate-800">👀 Xem prompt đã tạo</summary>
+        <pre id="prompt-preview" class="mt-2 bg-slate-900 text-slate-100 text-xs p-4 rounded-lg overflow-x-auto whitespace-pre-wrap"></pre>
+      </details>
+
+      <div class="flex gap-2">
+        <button onclick="copyPrompt()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-sm">📋 Copy lại</button>
+        <button id="download-img-btn" onclick="downloadImages()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-sm hidden">💾 Tải ảnh</button>
+        <button onclick="backToDashboard()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm">✓ Xong</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="text-center py-6 text-xs text-slate-400">
+  <span data-cfg="footer">—</span> • <a href="_CORE/FORM_SCHEMA.md.template" class="hover:underline">Schema</a>
+</footer>
+
+<!-- ===== CONFIG MODAL (file picker / switcher) ===== -->
+<div id="config-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
+  <div class="modal-panel bg-white rounded-xl shadow-2xl p-6">
+    <h3 class="text-lg font-bold text-slate-800 mb-1">⚙️ Business Config</h3>
+    <p class="text-xs text-slate-500 mb-4">Load the JSON file that defines your company, state, fiscal year, and thresholds.</p>
+
+    <div id="cfg-current" class="mb-4 p-3 bg-slate-50 rounded-lg text-xs text-slate-600 break-all"></div>
+
+    <div class="space-y-3">
+      <label class="block">
+        <span class="text-sm font-medium text-slate-700">Upload config file</span>
+        <input id="cfg-file-input" type="file" accept=".json,application/json" class="mt-1 block w-full text-sm border border-slate-300 rounded-lg p-2">
+      </label>
+
+      <div id="cfg-recent" class="hidden">
+        <div class="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Recent</div>
+        <div id="cfg-recent-list" class="space-y-1"></div>
+      </div>
+
+      <div class="text-xs text-slate-500">
+        💡 Or add <code>?config=./path/to/config.json</code> to the URL.
+      </div>
+    </div>
+
+    <div class="mt-5 flex gap-2">
+      <button onclick="closeConfigModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-sm">Close</button>
+      <button onclick="reloadDefault()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm">🔄 Reload default</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================================
+// CONFIG LOADER — loads _BUSINESS_CONFIG.json and fills the form at runtime
+// ============================================================================
+let CFG = null;
+
+const STATE_NAMES = {
+  AL:'Alabama', AK:'Alaska', AZ:'Arizona', AR:'Arkansas', CA:'California', CO:'Colorado',
+  CT:'Connecticut', DE:'Delaware', FL:'Florida', GA:'Georgia', HI:'Hawaii', ID:'Idaho',
+  IL:'Illinois', IN:'Indiana', IA:'Iowa', KS:'Kansas', KY:'Kentucky', LA:'Louisiana',
+  ME:'Maine', MD:'Maryland', MA:'Massachusetts', MI:'Michigan', MN:'Minnesota', MS:'Mississippi',
+  MO:'Missouri', MT:'Montana', NE:'Nebraska', NV:'Nevada', NH:'New Hampshire', NJ:'New Jersey',
+  NM:'New Mexico', NY:'New York', NC:'North Carolina', ND:'North Dakota', OH:'Ohio', OK:'Oklahoma',
+  OR:'Oregon', PA:'Pennsylvania', RI:'Rhode Island', SC:'South Carolina', SD:'South Dakota',
+  TN:'Tennessee', TX:'Texas', UT:'Utah', VT:'Vermont', VA:'Virginia', WA:'Washington',
+  WV:'West Virginia', WI:'Wisconsin', WY:'Wyoming', DC:'District of Columbia'
+};
+
+function fmtUSD(n) {
+  if (n === null || n === undefined || isNaN(Number(n))) return '$—';
+  return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+async function tryFetch(path) {
+  try {
+    const res = await fetch(path, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const cfg = await res.json();
+    cfg._source_path = path;
+    return cfg;
+  } catch (_) { return null; }
+}
+
+async function loadConfig() {
+  const urlParam = new URLSearchParams(location.search).get('config');
+  const stored = localStorage.getItem('ai_acct_config_path');
+  const candidates = [urlParam, stored, './_BUSINESS_CONFIG.json', './_CONFIG/_BUSINESS_CONFIG.json', './_CONFIG/_BUSINESS_CONFIG.example.json']
+    .filter(Boolean);
+  for (const p of candidates) {
+    const cfg = await tryFetch(p);
+    if (cfg) return cfg;
+  }
+  return null;
+}
+
+function applyConfig(cfg) {
+  CFG = cfg;
+  if (!cfg) {
+    showBanner('⚠️ Chưa có config — header hiển thị placeholder. Click ⚙️ để upload _BUSINESS_CONFIG.json.', 'error');
+    return;
+  }
+  hideBanner();
+  const name = cfg.company?.legal_name || '—';
+  const role = cfg.owner?.role || 'Owner';
+  const fyYear = cfg.fiscal_year?.year || '—';
+  const state = cfg.operations?.state_of_operation || '—';
+  const entity = cfg.company?.entity_type || '—';
+
+  document.title = `${name} — AI Accounting Task Form`;
+  document.querySelectorAll('[data-cfg]').forEach(el => {
+    const key = el.getAttribute('data-cfg');
+    const map = {
+      'company.name': name,
+      'owner.role': role,
+      'summary': `FY${fyYear} • ${state} • ${entity}`,
+      'footer': `${name} • FY${fyYear} • ${state} • ${entity}`
+    };
+    if (key in map) el.textContent = map[key];
+  });
+
+  // Remember successful config path
+  if (cfg._source_path && !cfg._source_path.includes('example')) {
+    localStorage.setItem('ai_acct_config_path', cfg._source_path);
+    const recent = JSON.parse(localStorage.getItem('ai_acct_config_recent') || '[]');
+    if (!recent.includes(cfg._source_path)) {
+      recent.unshift(cfg._source_path);
+      localStorage.setItem('ai_acct_config_recent', JSON.stringify(recent.slice(0, 5)));
+    }
+  }
+  if (cfg._source_path && cfg._source_path.includes('example')) {
+    showBanner('ℹ️ Đang dùng example config (demo). Click ⚙️ để load config thật của công ty bạn.', 'warn');
+  }
+}
+
+function showBanner(msg, level) {
+  const b = document.getElementById('cfg-banner');
+  b.textContent = msg;
+  b.className = level === 'error' ? 'cfg-banner error px-4 py-2' : 'cfg-banner px-4 py-2';
+  b.classList.remove('hidden');
+}
+
+function hideBanner() {
+  document.getElementById('cfg-banner').classList.add('hidden');
+}
+
+// ============================================================================
+// PROMPT INTERPOLATION — replaces {{PLACEHOLDERS}} with CFG values
+// ============================================================================
+function interpolate(tpl) {
+  if (!tpl) return '';
+  const c = CFG || {};
+  const state = c.operations?.state_of_operation || '';
+  const thr = c.approval_thresholds || {};
+  const map = {
+    'COMPANY.NAME': c.company?.legal_name || '[Company]',
+    'COMPANY.DBA': c.company?.dba || c.company?.legal_name || '[Company]',
+    'COMPANY.ENTITY_TYPE': c.company?.entity_type || '[Entity]',
+    'COMPANY.INDUSTRY': c.company?.industry || '[Industry]',
+    'STATE.CODE': state || '[State]',
+    'STATE.NAME': STATE_NAMES[state] || state || '[State]',
+    'OWNER.NAME': c.owner?.name || '[Owner]',
+    'OWNER.ROLE': c.owner?.role || 'Owner',
+    'FY.YEAR': c.fiscal_year?.year || '[Year]',
+    'FY.LABEL': `FY${c.fiscal_year?.year || '—'}`,
+    'APPROVAL.TIER1_MAX': fmtUSD(thr.tier_1_max),
+    'APPROVAL.TIER2_MAX': fmtUSD(thr.tier_2_max),
+    'APPROVAL.TIER3_MAX': fmtUSD(thr.tier_3_max),
+    'APPROVAL.DUAL': fmtUSD(thr.dual_approval_threshold),
+    'APPROVAL.CAPEX': fmtUSD(thr.capex_threshold),
+    'COA_PATH': c.chart_of_accounts?.file_path || '02_General_Ledger/Chart_of_Accounts/Chart_of_Accounts.xlsx',
+    'BASE_CURRENCY': c.operations?.base_currency || 'USD',
+    'TODAY': new Date().toISOString().slice(0, 10),
+    'YYYY_QN': `${new Date().getFullYear()}_Q${Math.floor(new Date().getMonth() / 3) + 1}`
+  };
+  return tpl.replace(/\{\{([A-Z][A-Z0-9_.]*)\}\}/g, (m, k) => (k in map) ? map[k] : m);
+}
+
+// ============================================================================
+// CONFIG MODAL (switcher + file picker)
+// ============================================================================
+function openConfigModal() {
+  const cur = document.getElementById('cfg-current');
+  cur.innerHTML = CFG
+    ? `<strong>Loaded:</strong> ${CFG._source_path || '(uploaded)'}<br><strong>Company:</strong> ${CFG.company?.legal_name} • ${CFG.operations?.state_of_operation} • ${CFG.company?.entity_type}`
+    : `<em>No config loaded</em>`;
+  const recent = JSON.parse(localStorage.getItem('ai_acct_config_recent') || '[]');
+  const rw = document.getElementById('cfg-recent');
+  if (recent.length) {
+    rw.classList.remove('hidden');
+    document.getElementById('cfg-recent-list').innerHTML = recent.map(p =>
+      `<button onclick="loadFromPath('${p.replace(/'/g, "\\'")}')" class="w-full text-left text-xs bg-slate-50 hover:bg-blue-50 border border-slate-200 rounded px-2 py-1 truncate">${p}</button>`
+    ).join('');
+  } else {
+    rw.classList.add('hidden');
+  }
+  document.getElementById('config-modal').classList.remove('hidden');
+}
+
+function closeConfigModal() {
+  document.getElementById('config-modal').classList.add('hidden');
+}
+
+async function loadFromPath(path) {
+  const cfg = await tryFetch(path);
+  if (cfg) { applyConfig(cfg); closeConfigModal(); }
+  else { alert('❌ Không load được: ' + path); }
+}
+
+async function reloadDefault() {
+  localStorage.removeItem('ai_acct_config_path');
+  const cfg = await loadConfig();
+  applyConfig(cfg);
+  closeConfigModal();
+}
+
+document.getElementById('cfg-file-input').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const cfg = JSON.parse(ev.target.result);
+      cfg._source_path = `(uploaded: ${f.name})`;
+      applyConfig(cfg);
+      closeConfigModal();
+    } catch (err) {
+      alert('❌ JSON không hợp lệ: ' + err.message);
+    }
+  };
+  reader.readAsText(f);
+});
+
+// ============================================================================
+// TAILWIND OFFLINE FALLBACK DETECTOR
+// ============================================================================
+setTimeout(() => {
+  // If Tailwind script failed or didn't attach its runtime, enable fallback CSS.
+  if (window.__tw_cdn_failed || !window.tailwind) {
+    const fb = document.getElementById('tw-fallback');
+    if (fb) fb.media = 'all';
+    console.warn('[AI Accounting] Tailwind CDN unreachable — fallback CSS enabled.');
+  }
+}, 3000);
+
+// ============================================================================
+// TASK CONFIGURATIONS — prompts use {{PLACEHOLDERS}} interpolated at send time
+// ============================================================================
+const PHOTO_TASKS = {
+  'vendor-invoice': {
+    icon: '📥', title: 'Ghi nhận Hóa đơn đến', subtitle: 'Chụp/upload hóa đơn từ vendor',
+    prompt: `📥 GHI NHẬN VENDOR INVOICE — {{COMPANY.NAME}}
+
+Tôi đính kèm ảnh hóa đơn từ nhà cung cấp. Ghi chú thêm: "{NOTE}"
+
+Xin hãy:
+1️⃣ EXTRACT từ ảnh: vendor name, invoice #, invoice date, due date, total amount, line items, payment terms
+2️⃣ CONFIRM extracted data với tôi trước khi post (dạng bảng)
+3️⃣ Sau khi tôi OK:
+   - Tạo Journal Entry: Dr. [Expense Category] / Cr. 2000-Accounts Payable
+   - Xác định category (office supplies / software / professional services / etc.)
+   - Lưu PDF vào: 01_AP-AR_Management/Accounts_Payable/Vendor_Invoices/ theo format YYYYMMDD_Invoice_[Vendor]_[Amount].pdf
+   - Update AP aging tracker
+4️⃣ FLAG nếu: amount > {{APPROVAL.CAPEX}} (nên CapEx?) / approval threshold ({{APPROVAL.TIER1_MAX}}–{{APPROVAL.TIER2_MAX}} manager) / duplicate invoice
+5️⃣ Báo cáo: 3-5 dòng tóm tắt + link file đã lưu`
+  },
+  'expense': {
+    icon: '💳', title: 'Ghi nhận Chi phí lẻ', subtitle: 'Chụp receipt (credit card, petty cash)',
+    prompt: `💳 GHI NHẬN EXPENSE — {{COMPANY.NAME}}
+
+Tôi đính kèm ảnh receipt. Ghi chú: "{NOTE}"
+
+Xin hãy:
+1️⃣ EXTRACT: merchant, date, total, items, tax, tip
+2️⃣ XÁC ĐỊNH:
+   - Expense category (reference {{COA_PATH}})
+   - Payment source (Business CC / Petty Cash / Employee reimbursement)
+   - Nếu là meals/entertainment → yêu cầu business purpose (IRS Pub 463)
+3️⃣ CONFIRM với tôi
+4️⃣ Sau khi OK:
+   - Post JE: Dr. [Category] / Cr. [Payment source]
+   - Lưu receipt: 01_AP-AR_Management/Accounts_Payable/Receipts/ theo naming convention
+5️⃣ FLAG: receipt > $75 bắt buộc giữ / meals chỉ 50% deductible
+6️⃣ Báo cáo ngắn gọn`
+  },
+  'deposit': {
+    icon: '💵', title: 'Thu tiền vào', subtitle: 'Chụp check hoặc deposit slip',
+    prompt: `💵 GHI NHẬN DEPOSIT — {{COMPANY.NAME}}
+
+Tôi đính kèm ảnh check/deposit slip. Ghi chú: "{NOTE}"
+
+Xin hãy:
+1️⃣ EXTRACT: payer name, amount, date, check # (nếu có), memo
+2️⃣ MATCH với open invoice trong AR (tìm customer + amount khớp)
+3️⃣ CONFIRM với tôi
+4️⃣ Sau khi OK:
+   - Post JE: Dr. 1010-Cash / Cr. 1200-A/R (nếu match invoice) OR Cr. 4010-Revenue (nếu không)
+   - Đánh dấu invoice là PAID
+   - Update AR aging tracker
+   - Lưu deposit slip: 03_Bank_Reconciliation/Deposits/
+5️⃣ Báo cáo kết quả + remaining AR balance của customer đó`
+  },
+  'bank-statement': {
+    icon: '🏦', title: 'Đối soát Bank Statement', subtitle: 'Upload sao kê (PDF hoặc ảnh)',
+    prompt: `🏦 BANK RECONCILIATION — {{COMPANY.NAME}}
+
+Tôi đính kèm bank statement. Ghi chú: "{NOTE}"
+
+Xin hãy:
+1️⃣ EXTRACT tất cả transactions trong statement: date, description, debit/credit, balance
+2️⃣ SO SÁNH với GL (account 1010-Cash):
+   - Outstanding checks (đã phát hành chưa clear)
+   - Deposits in transit (đã ghi sổ chưa vào bank)
+   - Bank fees chưa ghi sổ
+   - Interest earned chưa ghi sổ
+   - Unknown discrepancies
+3️⃣ TÍNH:
+   Adjusted Bank Balance = Bank Balance + Deposits in Transit - Outstanding Checks
+   Adjusted Book Balance = Book Balance + Interest - Fees
+   Hai số này PHẢI khớp đến từng cent
+4️⃣ CONFIRM với tôi kết quả + proposed adjusting JEs
+5️⃣ Sau khi OK:
+   - Post adjusting JEs
+   - Tạo reconciliation worksheet Excel
+   - Lưu: 03_Bank_Reconciliation/Reconciliation_Reports/{{FY.LABEL}}/ theo naming YYYYMM_BankRecon_[Bank].xlsx
+6️⃣ Báo cáo: status, discrepancies found, next steps`
+  },
+  'w9': {
+    icon: '📄', title: 'Setup Contractor (W-9)', subtitle: 'Chụp form W-9',
+    prompt: `📄 SETUP CONTRACTOR — {{COMPANY.NAME}}
+
+Tôi đính kèm form W-9 từ contractor. Ghi chú: "{NOTE}"
+
+Xin hãy:
+1️⃣ EXTRACT: legal name, business name, TIN (SSN/EIN), address, federal tax classification, backup withholding status
+2️⃣ VALIDATE: tất cả fields bắt buộc đầy đủ (nếu thiếu → REJECT, yêu cầu contractor bổ sung)
+3️⃣ CONFIRM với tôi trước khi add vào hệ thống
+4️⃣ Sau khi OK:
+   - Add row vào 1099 tracker: 04_Tax_Compliance/Form_1099/1099_Tracker.xlsx
+   - Lưu W-9 gốc: 04_Tax_Compliance/Form_1099/W-9_Forms/ (file tên: W9_[Contractor]_YYYYMMDD.pdf)
+   - Setup YTD payment tracking (trigger 1099-NEC nếu > $600/year)
+5️⃣ FLAG: nếu thiếu W-9 → BLOCK payment to contractor (IRS backup withholding 24% rule)
+6️⃣ Báo cáo ngắn gọn + link file`
+  },
+  'w4': {
+    icon: '👤', title: 'Onboard Employee mới', subtitle: 'Chụp W-4 + state withholding form',
+    prompt: `👤 NEW EMPLOYEE SETUP — {{COMPANY.NAME}}
+
+Tôi đính kèm W-4 (federal) + state withholding form ({{STATE.NAME}}) của employee mới. Ghi chú: "{NOTE}"
+
+Xin hãy:
+1️⃣ EXTRACT từ W-4: tên, SSN last 4, filing status, dependents, additional withholding
+2️⃣ EXTRACT từ state form: state allowances/exemptions, additional withholding (hoặc note nếu {{STATE.CODE}} là no-income-tax state)
+3️⃣ XÁC NHẬN thiếu thông tin (hire date, pay rate, job title, benefits elections) — HỎI TÔI
+4️⃣ REMIND: I-9 phải complete trong 3 ngày làm việc
+5️⃣ Sau khi đủ data:
+   - Add employee vào roster: 05_Payroll/Employees_Roster.xlsx
+   - Lưu W-4 + state form: 05_Payroll/Employee_Files/[EmployeeName]/
+   - Calculate first paycheck withholding preview (reference _MODULES/state/{{STATE.CODE}}.md cho state-specific rules)
+6️⃣ Báo cáo: employee ID, effective date, first pay date expected`
+  }
+};
+
+const QUICK_REQUESTS = {
+  'monthly-close': {
+    icon: '📅', title: 'Đóng sổ cuối tháng',
+    prompt: `📅 MONTHLY CLOSE REQUEST — {{COMPANY.NAME}}
+
+Xin hãy bắt đầu quy trình Month-End Close cho {MONTH}.
+
+Execute full checklist:
+1️⃣ Bank reconciliation cho tất cả accounts (yêu cầu tôi upload statements nếu chưa có)
+2️⃣ AP/AR cut-off testing
+3️⃣ Post recurring accruals (utilities, payroll accrual, interest)
+4️⃣ Depreciation entries (nếu có fixed assets)
+5️⃣ Prepaid expense amortization
+6️⃣ Review Trial Balance → investigate suspense accounts
+7️⃣ Finalize adjusting entries
+8️⃣ Generate P&L + Balance Sheet + Cash Flow
+9️⃣ Variance analysis vs budget
+🔟 Executive summary 1-page
+
+Kết quả: Close package trong 06_Financial_Reporting/Monthly_Close/YYYY-MM/
+HỎI TÔI nếu thiếu bất kỳ input nào.`
+  },
+  'financial-report': {
+    icon: '📈', title: 'Báo cáo tài chính',
+    prompt: `📈 FINANCIAL REPORTS REQUEST — {{COMPANY.NAME}}
+
+Xin hãy tạo báo cáo tài chính.
+
+HỎI TÔI:
+- Report type: P&L / Balance Sheet / Cash Flow / All 3?
+- Period: Month / Quarter / YTD / Annual?
+- Period end date?
+- Comparison: None / Prior period / Prior year / Budget?
+- Detail level: Summary / Standard / Detailed?
+- Audience: Internal / Board / Bank / CPA?
+
+Sau khi có đủ info → generate Excel + lưu 06_Financial_Reporting/
+Báo kết quả + link file.`
+  },
+  'aging-report': {
+    icon: '📋', title: 'Aging Report AR/AP',
+    prompt: `📋 AGING REPORT REQUEST — {{COMPANY.NAME}}
+
+Xin hãy tạo Aging Report.
+
+HỎI TÔI:
+- AR aging (khách nợ company) hay AP aging (company nợ vendor)?
+- As of date?
+- Highlight threshold (VD: > $5K quá hạn > 60 ngày)?
+
+Output:
+- Buckets: Current / 1-30 / 31-60 / 61-90 / 90+
+- Excel file tại 01_AP-AR_Management/Aging_Reports/
+- Recommendations cho collection (nếu AR) hoặc payment prioritization (nếu AP)
+- Flag high-risk items`
+  }
+};
+
+const FORM_TASKS = {
+  'customer-invoice': {
+    icon: '📤', title: 'Xuất Hóa đơn cho Khách hàng',
+    fields: [
+      { name: 'customer', label: 'Tên Khách hàng', type: 'text', required: true, placeholder: 'Client ABC Corp' },
+      { name: 'amount', label: 'Số tiền ({{BASE_CURRENCY}})', type: 'number', step: '0.01', required: true, placeholder: '5000.00' },
+      { name: 'service', label: 'Mô tả Dịch vụ', type: 'textarea', required: true, placeholder: 'Consulting Services — Q2 {{FY.YEAR}}' },
+      { name: 'terms', label: 'Payment Terms', type: 'select', required: true, options: ['Net 15', 'Net 30', 'Net 60', 'Due on Receipt'] }
+    ],
+    prompt: `📤 TẠO CUSTOMER INVOICE — {{COMPANY.NAME}}
+
+Customer: {customer}
+Amount: \${amount}
+Service: {service}
+Terms: {terms}
+
+Xin hãy:
+1️⃣ Generate invoice # tiếp theo (format INV-YYYY-XXXX)
+2️⃣ Tạo PDF invoice với template chuẩn
+3️⃣ Post JE: Dr. 1200-A/R / Cr. 4010-Service Revenue
+4️⃣ Lưu: 01_AP-AR_Management/Accounts_Receivable/Customer_Invoices/
+5️⃣ Update AR tracker + schedule payment follow-up
+6️⃣ Báo kết quả + gửi invoice link`
+  },
+  'journal-entry': {
+    icon: '📓', title: 'Journal Entry thủ công',
+    fields: [
+      { name: 'date', label: 'Ngày', type: 'date', required: true },
+      { name: 'dr_account', label: 'Debit Account', type: 'text', required: true, placeholder: '1500 - Computer Equipment' },
+      { name: 'cr_account', label: 'Credit Account', type: 'text', required: true, placeholder: '2100 - Credit Card Payable' },
+      { name: 'amount', label: 'Số tiền ({{BASE_CURRENCY}})', type: 'number', step: '0.01', required: true },
+      { name: 'memo', label: 'Diễn giải', type: 'textarea', required: true }
+    ],
+    prompt: `📓 JOURNAL ENTRY — {{COMPANY.NAME}}
+
+Date: {date}
+Dr. {dr_account}                \${amount}
+    Cr. {cr_account}                    \${amount}
+Memo: {memo}
+
+Xin hãy:
+1️⃣ VALIDATE: Dr = Cr, accounts exist trong COA ({{COA_PATH}})
+2️⃣ CONFIRM với tôi
+3️⃣ Post JE vào GL, generate JE #
+4️⃣ Lưu: 02_General_Ledger/Journal_Entries/{{YYYY_QN}}/
+5️⃣ Update Trial Balance
+6️⃣ Báo JE # + impact lên TB`
+  },
+  'payroll-run': {
+    icon: '💰', title: 'Chạy Payroll',
+    fields: [
+      { name: 'period_end', label: 'Pay Period End', type: 'date', required: true },
+      { name: 'pay_date', label: 'Pay Date', type: 'date', required: true },
+      { name: 'owner_included', label: 'Owner W-2 có trong payroll?', type: 'select', required: true, options: ['Yes', 'No (⚠️ entity-dependent risk)'] }
+    ],
+    prompt: `💰 PROCESS PAYROLL — {{COMPANY.NAME}}
+
+Period End: {period_end}
+Pay Date: {pay_date}
+Owner on payroll: {owner_included}
+
+Xin hãy:
+1️⃣ HỎI TÔI: employee list + hours/salary từng người (hoặc upload timesheet)
+2️⃣ CALCULATE cho từng employee (reference _MODULES/state/{{STATE.CODE}}.md cho state-specific rates):
+   - Federal tax withholding (per W-4 + {{FY.YEAR}} tables)
+   - State income tax withholding ({{STATE.NAME}})
+   - FICA: SS 6.2% (2026 wage base), Medicare 1.45% (+0.9% > $200K)
+   - State disability/paid leave (if applicable in {{STATE.CODE}})
+   - 401(k) deferrals (if elected)
+   - Employer taxes: FUTA 0.6%, state SUI, other state employer taxes
+3️⃣ CONFIRM với tôi
+4️⃣ Post JE: Dr. 6100-Salaries / Cr. various Payables
+5️⃣ Generate payroll register + pay stubs
+6️⃣ Lưu: 05_Payroll/Pay_Periods/{{FY.LABEL}}/
+7️⃣ FLAG nếu Owner không trong payroll (entity-type reasonable comp issue — reference _MODULES/entity/{{COMPANY.ENTITY_TYPE}}.md)`
+  },
+  'owner-comp': {
+    icon: '⚠️', title: 'Owner Compensation Review',
+    fields: [
+      { name: 'proposed_salary', label: 'Proposed Annual Salary (W-2) {{BASE_CURRENCY}}', type: 'number', step: '0.01', required: true, placeholder: '80000.00' },
+      { name: 'proposed_distributions', label: 'Proposed Annual Distributions {{BASE_CURRENCY}}', type: 'number', step: '0.01', required: true, placeholder: '40000.00' },
+      { name: 'role', label: 'Role (CEO/Consultant/etc.)', type: 'text', required: true }
+    ],
+    prompt: `⚠️ OWNER COMPENSATION REVIEW — {{COMPANY.NAME}} ({{COMPANY.ENTITY_TYPE}})
+
+Proposed: \${proposed_salary}/year W-2 + \${proposed_distributions}/year distributions
+Role: {role}
+
+Reference _MODULES/entity/{{COMPANY.ENTITY_TYPE}}.md (section: owner-compensation) for entity-specific rules.
+
+Xin hãy:
+1️⃣ ASSESS reasonableness theo entity type ({{COMPANY.ENTITY_TYPE}}):
+   - Market rate cho "{role}" tại {{STATE.NAME}} (use BLS data)
+   - Entity-specific rules (S-Corp reasonable comp, C-Corp double taxation, LLC/Partnership guaranteed payments, etc.)
+   - Ratio salary:distributions check
+2️⃣ PULL benchmarks:
+   - BLS Occupational Employment Statistics
+   - Industry comps ({{COMPANY.INDUSTRY}})
+3️⃣ OUTPUT:
+   - Recommended salary range
+   - Supporting documentation
+   - Risk assessment (low/med/high audit risk)
+4️⃣ STRONGLY RECOMMEND: consult CPA trước khi finalize
+5️⃣ Lưu analysis: 05_Payroll/Owner_Compensation/OwnerComp_Analysis_{{FY.LABEL}}.xlsx`
+  },
+  'estimated-tax': {
+    icon: '🏛️', title: 'Estimated Tax Payment',
+    fields: [
+      { name: 'quarter', label: 'Quý', type: 'select', required: true, options: ['Q1 (Apr 15)', 'Q2 (Jun 15)', 'Q3 (Sep 15)', 'Q4 (Jan 15 next year)'] },
+      { name: 'ytd_income', label: 'YTD Taxable Income ({{BASE_CURRENCY}})', type: 'number', step: '0.01', required: true }
+    ],
+    prompt: `🏛️ ESTIMATED TAX PAYMENT — {{COMPANY.NAME}}
+
+Quarter: {quarter} {{FY.YEAR}}
+YTD Taxable Income: \${ytd_income}
+
+Entity: {{COMPANY.ENTITY_TYPE}} • State: {{STATE.NAME}}
+
+Xin hãy (reference _MODULES/entity/{{COMPANY.ENTITY_TYPE}}.md + _MODULES/state/{{STATE.CODE}}.md):
+1️⃣ CALCULATE estimated tax theo entity type:
+   - C-Corp: Form 1120-W (entity-level)
+   - Pass-through (S-Corp/LLC/Partnership): 1040-ES cho shareholders/members
+   - Sole Prop: 1040-ES cho owner
+2️⃣ CALCULATE state estimated tax ({{STATE.CODE}}) — see state module for form + method
+3️⃣ CALCULATE any state entity-level tax (franchise tax, margin tax, B&O, PTET, etc.) — see state module
+4️⃣ CONFIRM với tôi recommendations
+5️⃣ Sau khi OK:
+   - Post JE: Dr. 1420-Prepaid Taxes / Cr. Cash
+   - Schedule payment
+   - Lưu calc: 04_Tax_Compliance/Estimated_Tax_Payments/
+6️⃣ Báo: amount + deadline + method (ACH/check)`
+  },
+  'variance': {
+    icon: '📊', title: 'Variance Analysis',
+    fields: [
+      { name: 'department', label: 'Department', type: 'text', required: true, placeholder: 'IT / Marketing / Entire Company' },
+      { name: 'period', label: 'Period (YYYY-MM)', type: 'month', required: true },
+      { name: 'budget', label: 'Budget {{BASE_CURRENCY}}', type: 'number', step: '0.01', required: true },
+      { name: 'actual', label: 'Actual {{BASE_CURRENCY}}', type: 'number', step: '0.01', required: true }
+    ],
+    prompt: `📊 VARIANCE ANALYSIS — {{COMPANY.NAME}}
+
+Department: {department}
+Period: {period}
+Budget: \${budget}
+Actual: \${actual}
+
+Xin hãy:
+1️⃣ CALCULATE variance $ và %
+2️⃣ DRILL-DOWN theo GL account (pull detail transactions)
+3️⃣ IDENTIFY causes: one-time vs recurring, authorized vs unauthorized
+4️⃣ RECOMMEND actions: re-forecast / budget amendment / cost control
+5️⃣ Output: Excel report trong 07_Budget_Variance_Analysis/Variance_Reports/
+6️⃣ Flag nếu variance > 10% (material)`
+  },
+  'wire-transfer': {
+    icon: '💸', title: 'Wire Transfer > {{APPROVAL.DUAL}}',
+    fields: [
+      { name: 'amount', label: 'Số tiền ({{BASE_CURRENCY}})', type: 'number', step: '0.01', required: true },
+      { name: 'beneficiary', label: 'Beneficiary Name', type: 'text', required: true },
+      { name: 'purpose', label: 'Purpose', type: 'textarea', required: true },
+      { name: 'approver', label: 'Approver (CFO/CEO)', type: 'text', required: true }
+    ],
+    prompt: `💸 WIRE TRANSFER — {{COMPANY.NAME}}
+
+Amount: \${amount}
+Beneficiary: {beneficiary}
+Purpose: {purpose}
+Approver: {approver}
+
+⚠️ DUAL APPROVAL REQUIRED cho wire > {{APPROVAL.DUAL}}.
+
+Xin hãy:
+1️⃣ VERIFY: amount vs approver's authority ({{APPROVAL.TIER2_MAX}}–{{APPROVAL.TIER3_MAX}}=CFO, > {{APPROVAL.TIER3_MAX}}=CEO)
+2️⃣ VERIFY: beneficiary đã có trong vendor master (chống fictitious)
+3️⃣ REQUEST second approver confirmation
+4️⃣ Sau khi 2 approvers OK:
+   - Post JE: Dr. [Expense/A/P] / Cr. 1010-Cash
+   - Lưu wire confirmation: 03_Bank_Reconciliation/Wire_Transfers/
+5️⃣ FLAG in month-end review as significant transaction
+6️⃣ Báo: wire #, expected settlement date`
+  },
+  'adjusting-entry': {
+    icon: '✏️', title: 'Adjusting Entry',
+    fields: [
+      { name: 'type', label: 'Loại', type: 'select', required: true, options: ['Accrued Expense', 'Accrued Revenue', 'Prepaid Expense amortization', 'Deferred Revenue recognition', 'Depreciation', 'Bad Debt allowance'] },
+      { name: 'period_end', label: 'Period End', type: 'date', required: true },
+      { name: 'amount', label: 'Amount {{BASE_CURRENCY}}', type: 'number', step: '0.01', required: true },
+      { name: 'calculation', label: 'Calculation/Reasoning', type: 'textarea', required: true }
+    ],
+    prompt: `✏️ ADJUSTING ENTRY — {{COMPANY.NAME}}
+
+Type: {type}
+Period End: {period_end}
+Amount: \${amount}
+Calculation: {calculation}
+
+Xin hãy:
+1️⃣ VALIDATE: amount hợp lý, period còn mở
+2️⃣ XÁC ĐỊNH debit/credit accounts theo type
+3️⃣ CONFIRM với tôi
+4️⃣ Post adjusting JE + auto-reversing entry (nếu cần) cho period tiếp
+5️⃣ Lưu: 02_General_Ledger/Adjusting_Entries/
+6️⃣ Update trial balance impact`
+  }
+};
+
+// ============================================================================
+// STATE
+// ============================================================================
+let currentTask = null;
+let currentMode = null; // 'photo' | 'form' | 'request'
+let uploadedFiles = [];
+let currentPrompt = '';
+
+// ============================================================================
+// INIT
+// ============================================================================
+document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+// Bootstrap config
+(async () => {
+  const cfg = await loadConfig();
+  applyConfig(cfg);
+})();
+
+// File input handler
+document.getElementById('file-input').addEventListener('change', handleFiles);
+
+// Drag & drop
+const dropzone = document.getElementById('dropzone');
+['dragenter', 'dragover'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('dragover'); }));
+['dragleave', 'drop'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove('dragover'); }));
+dropzone.addEventListener('drop', e => { handleFileList(e.dataTransfer.files); });
+
+// ============================================================================
+// NAVIGATION
+// ============================================================================
+function showView(id) {
+  ['dashboard', 'photo-view', 'form-view', 'confirm-view'].forEach(v => {
+    document.getElementById(v).classList.toggle('hidden', v !== id);
+  });
+  window.scrollTo(0, 0);
+}
+
+function backToDashboard() {
+  currentTask = null; currentMode = null; uploadedFiles = []; currentPrompt = '';
+  document.getElementById('preview').innerHTML = '';
+  document.getElementById('preview').classList.add('hidden');
+  document.getElementById('photo-note').value = '';
+  document.getElementById('file-input').value = '';
+  document.getElementById('send-btn').disabled = true;
+  showView('dashboard');
+}
+
+// ============================================================================
+// PHOTO FLOW
+// ============================================================================
+function openPhoto(taskId) {
+  currentTask = taskId;
+  currentMode = 'photo';
+  const cfg = PHOTO_TASKS[taskId];
+  document.getElementById('photo-header').innerHTML = `
+    <div class="flex items-center gap-3">
+      <div class="text-3xl">${cfg.icon}</div>
+      <div>
+        <h2 class="text-lg font-bold text-slate-800">${cfg.title}</h2>
+        <p class="text-sm text-slate-500">${cfg.subtitle}</p>
+      </div>
+    </div>
+  `;
+  showView('photo-view');
+}
+
+function handleFiles(e) {
+  handleFileList(e.target.files);
+}
+
+function handleFileList(fileList) {
+  uploadedFiles = Array.from(fileList);
+  if (uploadedFiles.length === 0) return;
+
+  const preview = document.getElementById('preview');
+  preview.innerHTML = '<div class="text-sm font-medium text-slate-700 mb-2">📎 Files (' + uploadedFiles.length + '):</div>';
+
+  const grid = document.createElement('div');
+  grid.className = 'grid grid-cols-2 md:grid-cols-3 gap-2';
+
+  uploadedFiles.forEach((f, i) => {
+    const tile = document.createElement('div');
+    tile.className = 'relative border border-slate-200 rounded-lg overflow-hidden bg-slate-50';
+
+    if (f.type.startsWith('image/')) {
+      const img = document.createElement('img');
+      img.className = 'w-full h-32 object-cover';
+      const reader = new FileReader();
+      reader.onload = e => img.src = e.target.result;
+      reader.readAsDataURL(f);
+      tile.appendChild(img);
+    } else {
+      tile.innerHTML = '<div class="h-32 flex items-center justify-center text-4xl">📄</div>';
+    }
+
+    const label = document.createElement('div');
+    label.className = 'p-2 text-xs truncate';
+    label.textContent = f.name;
+    tile.appendChild(label);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 text-xs';
+    removeBtn.textContent = '×';
+    removeBtn.onclick = () => {
+      uploadedFiles.splice(i, 1);
+      if (uploadedFiles.length === 0) {
+        preview.classList.add('hidden');
+        document.getElementById('send-btn').disabled = true;
+      } else {
+        handleFileList(uploadedFiles);
+      }
+    };
+    tile.appendChild(removeBtn);
+
+    grid.appendChild(tile);
+  });
+
+  preview.appendChild(grid);
+  preview.classList.remove('hidden');
+  document.getElementById('send-btn').disabled = false;
+}
+
+function sendPhotoTask() {
+  const cfg = PHOTO_TASKS[currentTask];
+  const note = document.getElementById('photo-note').value.trim() || 'không có';
+  currentPrompt = interpolate(cfg.prompt.replace('{NOTE}', note));
+  showConfirmation(true);
+}
+
+// ============================================================================
+// QUICK REQUEST FLOW
+// ============================================================================
+function quickRequest(taskId) {
+  currentTask = taskId;
+  currentMode = 'request';
+  const cfg = QUICK_REQUESTS[taskId];
+  currentPrompt = cfg.prompt;
+
+  // For monthly-close, ask for month
+  if (taskId === 'monthly-close') {
+    const month = prompt('Tháng cần close (YYYY-MM):', new Date().toISOString().slice(0, 7));
+    if (!month) return;
+    currentPrompt = cfg.prompt.replace('{MONTH}', month);
+  }
+
+  currentPrompt = interpolate(currentPrompt);
+  showConfirmation(false);
+}
+
+// ============================================================================
+// FORM FLOW
+// ============================================================================
+function openForm(taskId) {
+  currentTask = taskId;
+  currentMode = 'form';
+  const cfg = FORM_TASKS[taskId];
+
+  document.getElementById('form-header').innerHTML = `
+    <div class="flex items-center gap-3">
+      <div class="text-3xl">${cfg.icon}</div>
+      <div>
+        <h2 class="text-lg font-bold text-slate-800">${interpolate(cfg.title)}</h2>
+      </div>
+    </div>
+  `;
+
+  const form = document.getElementById('task-form');
+  form.innerHTML = cfg.fields.map(f => renderField(f)).join('') + `
+    <div class="flex gap-2 pt-3 border-t border-slate-100 mt-4">
+      <button type="button" onclick="backToDashboard()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-sm">Hủy</button>
+      <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium">Tiếp →</button>
+    </div>
+  `;
+
+  showView('form-view');
+}
+
+function renderField(f) {
+  const req = f.required ? 'required' : '';
+  const reqMark = f.required ? '<span class="text-red-500">*</span>' : '';
+  const label = interpolate(f.label);
+  const placeholder = interpolate(f.placeholder || '');
+  let input;
+  if (f.type === 'textarea') {
+    input = `<textarea name="${f.name}" rows="2" placeholder="${placeholder}" ${req} class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>`;
+  } else if (f.type === 'select') {
+    const opts = f.options.map(o => `<option value="${o}">${interpolate(o)}</option>`).join('');
+    input = `<select name="${f.name}" ${req} class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500"><option value="">-- Chọn --</option>${opts}</select>`;
+  } else {
+    const extras = [f.step?`step="${f.step}"`:'', placeholder?`placeholder="${placeholder}"`:''].filter(Boolean).join(' ');
+    input = `<input type="${f.type}" name="${f.name}" ${extras} ${req} class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">`;
+  }
+  return `<div><label class="block text-sm font-medium text-slate-700 mb-1">${label} ${reqMark}</label>${input}</div>`;
+}
+
+function submitForm(e) {
+  e.preventDefault();
+  const cfg = FORM_TASKS[currentTask];
+  const fd = new FormData(e.target);
+  let p = cfg.prompt;
+  fd.forEach((v, k) => {
+    const display = (k.includes('amount') || k.includes('budget') || k.includes('actual') || k === 'ytd_income' || k === 'proposed_salary' || k === 'proposed_distributions')
+      ? parseFloat(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : v;
+    p = p.replaceAll(`{${k}}`, display);
+  });
+  currentPrompt = interpolate(p);
+  showConfirmation(false);
+}
+
+// ============================================================================
+// CONFIRMATION
+// ============================================================================
+function showConfirmation(hasAttachment) {
+  document.getElementById('prompt-preview').textContent = currentPrompt;
+  document.getElementById('attach-step').innerHTML = hasAttachment
+    ? 'Mở chat với AI + <strong>đính kèm ảnh</strong> đã upload (click "💾 Tải ảnh" nếu cần)'
+    : 'Mở chat với AI Accounting Controller';
+  document.getElementById('download-img-btn').classList.toggle('hidden', !hasAttachment);
+  copyPrompt(false);
+  showView('confirm-view');
+}
+
+function copyPrompt(showAlert = true) {
+  navigator.clipboard.writeText(currentPrompt).then(() => {
+    if (showAlert) alert('✅ Đã copy prompt!');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = currentPrompt;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (showAlert) alert('✅ Đã copy prompt!');
+  });
+}
+
+function downloadImages() {
+  uploadedFiles.forEach((f, i) => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(f);
+    a.download = f.name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+}
+</script>
+
+</body>
+</html>

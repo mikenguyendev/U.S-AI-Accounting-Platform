@@ -1,0 +1,86 @@
+{
+  "_comment": "EXAMPLE config — generic demo data. Copy this file, rename to _BUSINESS_CONFIG.json, then customize cho company của bạn.",
+  "_template": "AI Accounting Template v1.0.0 by mikenguyen.dev@gmail.com",
+
+  "schema_version": "1.0.0",
+  "instance_id": "Acme_Service_Group",
+  "last_updated": "2026-04-22",
+
+  "company": {
+    "legal_name": "Acme Service Group",
+    "dba": null,
+    "ein": null,
+    "entity_type": "S-Corp",
+    "state_of_incorporation": "CA",
+    "date_of_incorporation": null,
+    "industry": "Service",
+    "industry_subtype": "Professional consulting services"
+  },
+
+  "operations": {
+    "state_of_operation": "CA",
+    "additional_states": [],
+    "city": null,
+    "zip_code": null,
+    "accounting_software": "Excel",
+    "accounting_basis": "Accrual",
+    "base_currency": "USD"
+  },
+
+  "fiscal_year": {
+    "year": 2026,
+    "start_date": "2026-01-01",
+    "end_date": "2026-12-31",
+    "is_calendar_year": true
+  },
+
+  "owner": {
+    "name": "Jane Doe",
+    "email": "owner@example.com",
+    "phone": null,
+    "role": "Owner",
+    "preferred_language": "vi-en",
+    "is_owner_employee": true
+  },
+
+  "approval_thresholds": {
+    "preset": "Conservative",
+    "tier_1_max": 1000,
+    "tier_2_max": 10000,
+    "tier_3_max": 50000,
+    "dual_approval_threshold": 10000,
+    "capex_threshold": 2500
+  },
+
+  "bank_accounts": [],
+
+  "employees": [],
+
+  "contractors": [],
+
+  "compliance_status": {
+    "ein_obtained": false,
+    "boi_filed": false,
+    "boi_filed_date": null,
+    "state_registration_complete": false,
+    "sales_tax_permit": null,
+    "workers_comp_insurance": null,
+    "general_liability_insurance": false,
+    "business_license": false,
+    "operating_agreement_or_bylaws": false,
+    "payroll_provider": null
+  },
+
+  "chart_of_accounts": {
+    "industry_template": "Service",
+    "file_path": "02_General_Ledger/Chart_of_Accounts/Chart_of_Accounts_FY2026.xlsx",
+    "size": "Minimal",
+    "qbo_compatible_numbering": true
+  },
+
+  "branding": {
+    "logo_path": null,
+    "primary_color_hex": null,
+    "invoice_prefix": "INV-"
+  }
+}

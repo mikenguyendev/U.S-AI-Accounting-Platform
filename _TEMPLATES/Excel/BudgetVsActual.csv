@@ -1,0 +1,44 @@
+Section,Department_or_Account,Account_Number,Annual_Budget,YTD_Budget,YTD_Actual,Variance_Dollar,Variance_Pct,Variance_Type,Forecast_Full_Year,FY_Variance_vs_Budget,Notes_Action_Items
+HEADER,Company Name,,,,,,,,,,
+HEADER,Budget vs Actual Analysis,,,,,,,,,,
+HEADER,For Period Ending: [Date],,,,,,,,,,
+,,,,,,,,,,,
+REVENUE,Service Revenue - Consulting,4010,300000,100000,95000,-5000,-5%,Unfavorable,290000,-10000,Slower start - new BD hire ramping
+REVENUE,Service Revenue - Project,4020,150000,50000,55000,5000,10%,Favorable,165000,15000,Two projects pulled forward from Q3
+REVENUE,Service Revenue - Subscription,4030,180000,60000,62000,2000,3%,Favorable,185000,5000,Steady recurring growth
+SUBTOTAL,TOTAL REVENUE,,630000,210000,212000,2000,1%,Favorable,640000,10000,
+,,,,,,,,,,,
+COGS,Cost of Services - Subcontractors,5010,90000,30000,32000,-2000,-7%,Unfavorable,95000,-5000,Higher subcontractor utilization
+SUBTOTAL,TOTAL COGS,,90000,30000,32000,-2000,-7%,Unfavorable,95000,-5000,
+,,,,,,,,,,,
+CALCULATION,GROSS PROFIT,,540000,180000,180000,0,0%,On Plan,545000,5000,
+CALCULATION,Gross Profit Margin %,,85.7%,85.7%,84.9%,-0.8%,,,85.2%,,
+,,,,,,,,,,,
+OPEX,Salaries and Wages,6010,180000,60000,62000,-2000,-3%,Unfavorable,184000,-4000,New hire 2 weeks early
+OPEX,Officer Compensation,6020,120000,40000,40000,0,0%,On Plan,120000,0,
+OPEX,Payroll Tax Expense,6030,23000,7670,7800,-130,-2%,Unfavorable,23400,-400,Tracks salaries
+OPEX,Health Insurance,6040,18000,6000,5800,200,3%,Favorable,17400,600,Lower than budgeted
+OPEX,Rent - Office,6100,36000,12000,12000,0,0%,On Plan,36000,0,
+OPEX,Utilities,6200,3600,1200,1100,100,8%,Favorable,3300,300,
+OPEX,Software and Subscriptions,6310,12000,4000,4500,-500,-13%,Unfavorable,13500,-1500,Added Slack + Notion premium
+OPEX,Professional Services,6400-6420,15000,5000,4500,500,10%,Favorable,14000,1000,No legal incidents
+OPEX,Marketing and Advertising,6500,30000,10000,8000,2000,20%,Favorable,28000,2000,Underspent — re-evaluate
+OPEX,Travel,6600,12000,4000,5500,-1500,-37%,Unfavorable,16500,-4500,3 client trips Q1
+OPEX,Insurance,6700-6720,8000,2667,2700,-33,-1%,Unfavorable,8100,-100,
+OPEX,Bank Fees,6800,1200,400,420,-20,-5%,Unfavorable,1260,-60,
+OPEX,Other Operating,6900,5000,1667,1500,167,10%,Favorable,4500,500,
+SUBTOTAL,TOTAL OPERATING EXPENSES,,463800,154603,155820,-1217,-1%,Unfavorable,469960,-6160,
+,,,,,,,,,,,
+CALCULATION,OPERATING INCOME (EBIT),,76200,25397,24180,-1217,-5%,Unfavorable,75040,-1160,
+CALCULATION,Operating Margin %,,12.1%,12.1%,11.4%,-0.7%,,,11.7%,,
+,,,,,,,,,,,
+DEPT_BREAKDOWN,Department Budgets,,,,,,,,,,
+DEPT_BREAKDOWN,Sales Department,,180000,60000,62000,-2000,-3%,Unfavorable,184000,-4000,
+DEPT_BREAKDOWN,Marketing Department,,42000,14000,12500,1500,11%,Favorable,40500,1500,
+DEPT_BREAKDOWN,Operations,,210000,70000,71500,-1500,-2%,Unfavorable,213000,-3000,
+DEPT_BREAKDOWN,General & Administrative,,31800,10603,9820,783,7%,Favorable,32500,-700,
+,,,,,,,,,,,
+ACTION_ITEMS,Required Actions,,,,,,,,,,
+ACTION_ITEMS,Travel overspend - implement approval threshold,,,,,,,,,,Approve >$1000 trips by CFO
+ACTION_ITEMS,Marketing underspend - reallocate to Q2-Q3 campaigns,,,,,,,,,,Discuss with marketing lead
+ACTION_ITEMS,Subcontractor variance - re-baseline if continues,,,,,,,,,,Watch Q2

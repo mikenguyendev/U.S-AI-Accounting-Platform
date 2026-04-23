@@ -1,0 +1,116 @@
+Account_Number,Account_Name,Account_Type,Account_Subtype,Tax_Line,Description
+1010,Cash — Operating Checking,Asset,Current Asset,Schedule L Line 1,Primary checking
+1020,Cash — Savings,Asset,Current Asset,Schedule L Line 1,Reserves
+1030,Cash — Payroll,Asset,Current Asset,Schedule L Line 1,Payroll funding
+1100,Accounts Receivable,Asset,Current Asset,Schedule L Line 2a,Customer invoices outstanding
+1110,AR — Allowance for Doubtful Accounts,Asset,Current Asset,Schedule L Line 2b,Bad debt allowance
+1120,Stripe Pending Payouts,Asset,Current Asset,Schedule L Line 1,Stripe pending settlement
+1130,Unbilled Receivables (Accrued Revenue),Asset,Current Asset,Schedule L Line 2a,Revenue earned not yet billed
+1200,Prepaid Expenses,Asset,Current Asset,Schedule L Line 6,General prepaid
+1210,Prepaid Insurance,Asset,Current Asset,Schedule L Line 6,Insurance prepaid
+1220,Prepaid Software/SaaS Tools,Asset,Current Asset,Schedule L Line 6,Annual SaaS subscriptions prepaid
+1230,Prepaid Cloud Hosting (AWS/GCP/Azure),Asset,Current Asset,Schedule L Line 6,Reserved instances/committed spend
+1240,Prepaid Marketing Campaigns,Asset,Current Asset,Schedule L Line 6,Annual ad commitments
+1300,Sales Commissions Asset (ASC 606),Asset,Current Asset,Schedule L Line 6,Capitalized commissions per ASC 606
+1500,Computer Equipment,Asset,Fixed Asset,Schedule L Line 10a,Laptops/servers
+1510,Office Equipment,Asset,Fixed Asset,Schedule L Line 10a,Office equipment
+1520,Furniture and Fixtures,Asset,Fixed Asset,Schedule L Line 10a,Office furniture
+1530,Leasehold Improvements,Asset,Fixed Asset,Schedule L Line 10a,Office buildouts
+1590,Accumulated Depreciation,Asset,Accumulated Depreciation,Schedule L Line 10b,Total depreciation (contra)
+1700,Security Deposits,Asset,Other Asset,Schedule L Line 13,Office lease deposit
+1710,Capitalized Software Development,Asset,Intangible Asset,Schedule L Line 12,Internal software dev costs (post-feasibility)
+1720,Capitalized Software Amortization,Asset,Intangible Asset,Schedule L Line 12,Amortization of capitalized software (contra)
+1730,Acquired Customer Intangibles,Asset,Intangible Asset,Schedule L Line 12,Customer relationship intangibles (M&A)
+1740,Goodwill,Asset,Intangible Asset,Schedule L Line 12,Goodwill from acquisitions
+2010,Accounts Payable,Liability,Current Liability,Schedule L Line 16,Vendor invoices outstanding
+2100,Credit Card Payable,Liability,Current Liability,Schedule L Line 17,Credit card balance
+2200,Accrued Expenses,Liability,Current Liability,Schedule L Line 17,Accrued expenses
+2210,Accrued Salaries and Wages,Liability,Current Liability,Schedule L Line 17,Wages earned not yet paid
+2220,Accrued Bonuses,Liability,Current Liability,Schedule L Line 17,Performance bonuses earned
+2230,Accrued Vacation/PTO,Liability,Current Liability,Schedule L Line 17,Accrued PTO
+2240,Accrued Sales Commissions,Liability,Current Liability,Schedule L Line 17,Sales commissions owed
+2300,Payroll Liabilities,Liability,Current Liability,Schedule L Line 17,Withheld payroll taxes
+2310,Federal Income Tax Withheld,Liability,Current Liability,,Federal income tax pending Form 941
+2320,FICA Withheld (Employee),Liability,Current Liability,,FICA employee
+2330,FICA Payable (Employer),Liability,Current Liability,,Employer FICA
+2340,State Income Tax Withheld,Liability,Current Liability,,State withholding
+2350,State Unemployment Tax,Liability,Current Liability,,SUI/SUTA
+2360,Federal Unemployment Tax,Liability,Current Liability,,FUTA
+2400,Sales Tax Payable,Liability,Current Liability,Schedule L Line 17,Sales tax (varies — SaaS taxable in some states)
+2500,Income Tax Payable,Liability,Current Liability,Schedule L Line 17,Income tax owed
+2600,Notes Payable — Short-term,Liability,Current Liability,Schedule L Line 18,Short-term loans/SAFE notes
+2700,Deferred Revenue — Current,Liability,Current Liability,Schedule L Line 17,Annual subscriptions paid upfront (12 mo or less)
+2710,Deferred Revenue — Long-term,Liability,Long-term Liability,Schedule L Line 20,Multi-year subscriptions (>12 mo)
+2720,Customer Deposits,Liability,Current Liability,Schedule L Line 17,POC deposits
+2800,Notes Payable — Long-term,Liability,Long-term Liability,Schedule L Line 20,Long-term loans
+2810,Convertible Notes / SAFEs,Liability,Long-term Liability,Schedule L Line 20,Convertible debt instruments
+3010,Common Stock,Equity,Common Stock,Schedule L Line 22,Common stock par value
+3020,Preferred Stock — Series A/B/Seed,Equity,Preferred Stock,Schedule L Line 22,Preferred series stock (C-Corp only)
+3030,Additional Paid-in Capital,Equity,Additional Paid-in Capital,Schedule L Line 23,APIC (significant for VC-backed)
+3040,Stock-Based Compensation,Equity,Additional Paid-in Capital,Schedule L Line 23,SBC reserve (offset to expense)
+3050,Retained Earnings (Accumulated Deficit),Equity,Retained Earnings,Schedule L Line 25,Accumulated profit/deficit (often deficit for early-stage)
+3060,Distributions/Dividends,Equity,Distributions,Schedule M-2,Distributions (rare in SaaS, usually retained)
+3070,Treasury Stock,Equity,Treasury Stock,Schedule L Line 26,Stock bought back from shareholders
+4010,Subscription Revenue — Annual,Revenue,Subscription Revenue,Form 1120 Line 1a,Annual SaaS subscriptions (recognize ratably)
+4020,Subscription Revenue — Monthly,Revenue,Subscription Revenue,Form 1120 Line 1a,Monthly SaaS subscriptions
+4030,Subscription Revenue — Multi-Year,Revenue,Subscription Revenue,Form 1120 Line 1a,Multi-year contracts
+4040,Usage-Based Revenue,Revenue,Subscription Revenue,Form 1120 Line 1a,Pay-as-you-go usage charges
+4050,Implementation/Onboarding Revenue,Revenue,Service Revenue,Form 1120 Line 1a,Setup fees (recognize per ASC 606)
+4060,Professional Services Revenue,Revenue,Service Revenue,Form 1120 Line 1a,Consulting/training services
+4070,Add-on/Upsell Revenue,Revenue,Subscription Revenue,Form 1120 Line 1a,Add-on features/seats
+4090,Refunds and Credits,Revenue,Subscription Revenue,Form 1120 Line 1b,Refunds issued (contra)
+4095,Sales Discounts and Promotions,Revenue,Subscription Revenue,Form 1120 Line 1b,Promotional discounts (contra)
+5010,Cost of Revenue — Hosting Infrastructure,COGS,Cost of Services,Form 1120 Line 2,AWS/GCP/Azure cloud costs (production)
+5020,Cost of Revenue — Third-Party APIs,COGS,Cost of Services,Form 1120 Line 2,API costs passed through (Twilio/SendGrid/etc.)
+5030,Cost of Revenue — Customer Support,COGS,Cost of Services,Form 1120 Line 2,Customer support team wages (cost of delivery)
+5040,Cost of Revenue — Customer Success,COGS,Cost of Services,Form 1120 Line 2,Customer success team (if direct cost)
+5050,Cost of Revenue — Payment Processing,COGS,Cost of Services,Form 1120 Line 2,Stripe/processor fees (if not in 6810)
+5060,Cost of Revenue — Implementation Labor,COGS,Cost of Services,Form 1120 Line 2,Implementation team wages
+5070,Software Amortization (CoR),COGS,Cost of Services,Form 1120 Line 2,Amortization of capitalized software dev
+6010,Salaries and Wages — Engineering (R&D),Expense,Salaries and Wages,Form 1120 Line 13,Engineering wages (R&D portion)
+6020,Salaries and Wages — Sales,Expense,Salaries and Wages,Form 1120 Line 13,Sales team wages
+6030,Salaries and Wages — Marketing,Expense,Salaries and Wages,Form 1120 Line 13,Marketing team wages
+6040,Salaries and Wages — G&A,Expense,Salaries and Wages,Form 1120 Line 13,Finance/HR/admin wages
+6050,Officer Compensation,Expense,Salaries and Wages,Form 1120 Line 12,Owner-employee/exec W-2
+6060,Payroll Tax Expense,Expense,Salaries and Wages,Form 1120 Line 17,Employer payroll taxes
+6070,Employee Benefits,Expense,Salaries and Wages,Form 1120 Line 24,Health/dental/vision
+6080,401(k) Match,Expense,Salaries and Wages,Form 1120 Line 23,Employer retirement contributions
+6090,Stock-Based Compensation Expense,Expense,Salaries and Wages,Form 1120 Line 13,SBC expense (offset to equity)
+6100,Sales Commissions,Expense,Salaries and Wages,Form 1120 Line 13,Sales commissions paid (or amortized per ASC 606)
+6110,Customer Acquisition Cost (CAC) — Tracking,Expense,Marketing,Form 1120 Line 22,CAC tracking sub-account
+6200,Rent — Office,Expense,Rent,Form 1120 Line 16,Office rent
+6210,Utilities,Expense,Utilities,Form 1120 Line 26,Office utilities
+6220,Telephone and Internet,Expense,Utilities,Form 1120 Line 26,Communications
+6300,Software Subscriptions — Internal Use,Expense,Office Expense,Form 1120 Line 26,Internal SaaS tools (Slack/Jira/etc.)
+6310,Cloud Hosting — Non-Production,Expense,Office Expense,Form 1120 Line 26,Dev/staging environments
+6320,Office Supplies,Expense,Office Expense,Form 1120 Line 26,Office supplies
+6400,Professional Services — Legal,Expense,Professional Services,Form 1120 Line 26,Legal fees (high for VC-backed)
+6410,Professional Services — Accounting,Expense,Professional Services,Form 1120 Line 26,CPA/tax fees
+6420,Professional Services — IT/Security,Expense,Professional Services,Form 1120 Line 26,Penetration testing/audits
+6430,Professional Services — Recruiting,Expense,Professional Services,Form 1120 Line 26,Recruiter fees
+6500,Marketing — Paid Ads,Expense,Marketing,Form 1120 Line 22,Google/LinkedIn/Facebook ads
+6510,Marketing — Content/SEO,Expense,Marketing,Form 1120 Line 22,Content marketing/SEO
+6520,Marketing — Events/Sponsorships,Expense,Marketing,Form 1120 Line 22,Conferences/sponsorships
+6530,Marketing — Tools and Software,Expense,Marketing,Form 1120 Line 22,Marketing automation/CRM
+6540,Marketing — Branded Collateral,Expense,Marketing,Form 1120 Line 22,Swag/promo items
+6600,Travel — Sales,Expense,Travel and Meals,Form 1120 Line 26,Sales travel
+6610,Travel — Conferences,Expense,Travel and Meals,Form 1120 Line 26,Conference attendance
+6620,Meals — 50% Deductible,Expense,Travel and Meals,Form 1120 Line 26,Customer/team meals
+6700,Insurance — General Liability,Expense,Insurance,Form 1120 Line 18,GL insurance
+6710,Insurance — D&O (Directors and Officers),Expense,Insurance,Form 1120 Line 18,D&O insurance (VC-backed)
+6720,Insurance — E&O/Tech,Expense,Insurance,Form 1120 Line 18,Errors and omissions/tech
+6730,Insurance — Cyber Liability,Expense,Insurance,Form 1120 Line 18,Cyber/data breach (CRITICAL for SaaS)
+6740,Insurance — Workers' Comp,Expense,Insurance,Form 1120 Line 18,Workers' comp
+6800,Bank Fees,Expense,Other Operating Expense,Form 1120 Line 26,Bank charges
+6810,Payment Processing Fees (Non-CoR),Expense,Other Operating Expense,Form 1120 Line 26,Processing fees not in COGS
+6820,Compliance Costs (SOC 2/GDPR/HIPAA),Expense,Other Operating Expense,Form 1120 Line 26,Compliance audit/certification
+6830,Continuing Education/Training,Expense,Other Operating Expense,Form 1120 Line 26,Team training/certifications
+6850,Depreciation Expense,Expense,Depreciation,Form 1120 Line 20,Office equipment depreciation
+6860,Amortization Expense (Non-Software),Expense,Depreciation,Form 1120 Line 20,Goodwill/intangibles amortization
+6900,Other Operating Expenses,Expense,Other Operating Expense,Form 1120 Line 26,Catch-all
+7010,Interest Income,Other_Income,Interest Income,Form 1120 Line 5,Bank/investment interest
+7020,Other Income,Other_Income,Other Operating Expense,Form 1120 Line 10,Misc income
+7100,Interest Expense,Other_Expense,Interest Expense,Form 1120 Line 18,Loan/convertible note interest
+7200,Federal Income Tax Expense,Other_Expense,Tax Expense,Form 1120 Line 31,Federal tax (often $0 for early-stage with NOLs)
+7210,State Income Tax Expense,Other_Expense,Tax Expense,Form 1120 Line 17,State tax
+7220,State Franchise Tax (DE etc.),Other_Expense,Tax Expense,Form 1120 Line 17,DE franchise tax (common for SaaS C-Corps)

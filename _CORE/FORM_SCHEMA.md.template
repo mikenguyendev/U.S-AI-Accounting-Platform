@@ -1,0 +1,537 @@
+# 📐 FORM SCHEMA — Accounting_Task_Form.html
+
+> **Business Continuity Document** — Mô tả cách xử lý output từ form. File này giúp AI Agent kế nhiệm hiểu user workflow.
+
+**Company:** {{COMPANY.LEGAL_NAME}}
+**Form File:** `Accounting_Task_Form.html`
+**Last Updated:** {{COMPUTED:TODAY|long_date}}
+**Version:** 2.0 — Minimal Flow (Photo-first workflow)
+
+---
+
+## ⚡ V2.0 PHILOSOPHY: 2-CLICK RULE
+
+User chỉ cần **2 clicks + 1 photo** cho các nghiệp vụ hàng ngày:
+
+```
+Click 1: Chọn task (VD: "📥 Ghi nhận Hóa đơn đến")
+Click 2: Upload ảnh hóa đơn
+→ Form auto-generate prompt → copy vào clipboard
+→ User paste vào chat + attach ảnh
+→ AI làm phần còn lại
+```
+
+**Các task có photo workflow (6 loại):**
+1. `vendor-invoice` — chụp hóa đơn từ vendor
+2. `expense` — chụp receipt (credit card, petty cash)
+3. `deposit` — chụp check hoặc deposit slip
+4. `bank-statement` — upload bank statement
+5. `w9` — chụp form W-9 từ contractor
+6. `w4` — chụp W-4 + state withholding form từ employee
+
+**Quick requests (1 click, không cần input):**
+- `monthly-close` — đóng sổ cuối tháng
+- `financial-report` — báo cáo tài chính
+- `aging-report` — AR/AP aging
+
+**Advanced forms (cần input thủ công, không có ảnh):**
+- `customer-invoice`, `journal-entry`, `payroll-run`, `owner-comp`,
+  `estimated-tax`, `variance`, `wire-transfer`, `adjusting-entry`
+
+---
+
+## 🤖 AI 5-PHASE RESPONSE PROTOCOL (v2.0)
+
+Khi user paste prompt từ form (luôn bắt đầu bằng icon + task name trong CAPS):
+
+### Phase 1 — EXTRACT (OCR/Parse)
+- Nếu có ảnh đính kèm: OCR và extract structured data
+- Nếu là form submission: parse các field đã có
+- **Never hallucinate** — nếu trường nào không rõ trên ảnh → mark "UNCLEAR" và hỏi user
+
+### Phase 2 — CONFIRM (bắt buộc trước khi action)
+- Present extracted data **dưới dạng bảng** để user dễ verify
+- Format:
+  ```
+  📋 Extracted từ ảnh:
+  | Field | Value |
+  |-------|-------|
+  | Vendor | ACME Office Supplies |
+  | Invoice # | INV-{{FISCAL_YEAR.YEAR}}-0412 |
+  | Date | {{FISCAL_YEAR.YEAR}}-04-15 |
+  | Amount | $1,234.56 |
+
+  Proceed với thông tin này? (Y/N hoặc chỉnh sửa)
+  ```
+- **Đợi user confirm** trước khi move sang Phase 3
+
+### Phase 3 — EXECUTE (sau khi user OK)
+- Post journal entry đúng GAAP double-entry
+- Save file vào folder đúng convention
+- Update tracking files (AR aging, AP aging, trial balance)
+- Một lần cho tất cả — đừng chia nhỏ nhiều bước
+
+### Phase 4 — REPORT (tối giản, 3-5 dòng)
+Template báo cáo:
+```
+✅ Đã xử lý xong.
+
+📓 JE#[XXX]: Dr. [account] / Cr. [account] — $[amount]
+📁 File lưu: [path/to/file]
+📊 Impact: [1-line summary impact lên TB hoặc aging]
+⚠️ Flags: [any warnings, hoặc "None"]
+```
+
+### Phase 5 — FLAG (nếu có vi phạm)
+Proactively warn user về:
+- ⚠️ Approval threshold: nếu amount vượt threshold user được cấp ({{APPROVAL_THRESHOLDS.PRESET}} preset)
+- ⚠️ Entity rules: xem `_MODULES/entity/{{COMPANY.ENTITY_TYPE}}.md#flag-conditions`
+- ⚠️ State rules: xem `_MODULES/state/{{OPERATIONS.STATE_OF_OPERATION}}.md#flag-conditions`
+- ⚠️ IRS rules: meals >50% deducted, missing receipt >$75
+- ⚠️ Duplicate: invoice # đã tồn tại
+- ⚠️ CapEx: amount >{{FORMAT:APPROVAL_THRESHOLDS.CAPEX_THRESHOLD|currency}} có nên capitalize?
+
+---
+
+## 📋 TASK-SPECIFIC RESPONSE QUICK REFERENCE
+
+| Task | Trigger keywords in prompt | Primary action |
+|------|----------------------------|----------------|
+| `vendor-invoice` | "GHI NHẬN VENDOR INVOICE" | JE Dr.Expense/Cr.AP + save PDF |
+| `expense` | "GHI NHẬN EXPENSE" | JE Dr.Expense/Cr.CashOrCC + save receipt |
+| `deposit` | "GHI NHẬN DEPOSIT" | Match to AR invoice, JE Dr.Cash/Cr.AR |
+| `bank-statement` | "BANK RECONCILIATION" | Generate recon worksheet + adjusting JEs |
+| `w9` | "SETUP CONTRACTOR" | Add to 1099 tracker + save W-9 |
+| `w4` | "NEW EMPLOYEE SETUP" | Add to employee roster + save W-4 + state form |
+| `monthly-close` | "MONTHLY CLOSE REQUEST" | Full close cycle checklist |
+| `financial-report` | "FINANCIAL REPORTS REQUEST" | Ask clarifying Qs → generate |
+| `aging-report` | "AGING REPORT REQUEST" | Ask AR or AP → bucket + flag |
+| `customer-invoice` | "TẠO CUSTOMER INVOICE" | Generate invoice PDF + JE Dr.AR/Cr.Rev |
+| `journal-entry` | "JOURNAL ENTRY" | Validate + post |
+| `payroll-run` | "PROCESS PAYROLL" | Calculate withholding + post |
+| `owner-comp` | "OWNER COMPENSATION REVIEW" | BLS benchmark + risk assessment |
+| `estimated-tax` | "ESTIMATED TAX PAYMENT" | Calculate Fed + State |
+| `variance` | "VARIANCE ANALYSIS" | Compute %, flag if >10% |
+| `wire-transfer` | "WIRE TRANSFER" | Verify dual approval |
+| `adjusting-entry` | "ADJUSTING ENTRY" | Post + auto-reverse if needed |
+
+---
+
+## 🎯 OVERVIEW
+
+### Form Architecture
+- **Type:** Single-file HTML app (client-side only, no backend)
+- **Views:** 3 screens — Dashboard → Form Wizard → Preview & Submit
+- **Task types:** 18 distinct accounting workflows grouped in 6 categories
+- **Output:** Markdown (for AI) OR JSON (for audit trail)
+
+### User → AI Workflow
+```
+[User] opens HTML → selects task → fills form → clicks "Copy to AI"
+  ↓
+[Clipboard] contains markdown-formatted text
+  ↓
+[User] pastes into chat with AI Accounting Controller
+  ↓
+[AI] parses, validates, creates journal entry, saves file
+  ↓
+[AI] responds with confirmation + links to saved files
+```
+
+---
+
+## 📋 18 FORM TYPES — COMPLETE INDEX
+
+| # | Form ID | Title | Category | Priority |
+|---|---------|-------|----------|:--:|
+| 1 | `vendor-invoice` | Ghi nhận Vendor Invoice | AP/AR | ⭐⭐⭐ |
+| 2 | `customer-invoice` | Tạo Customer Invoice | AP/AR | ⭐⭐⭐ |
+| 3 | `aging-report` | Aging Report Request | AP/AR | ⭐⭐ |
+| 4 | `journal-entry` | Journal Entry | GL | ⭐⭐⭐ |
+| 5 | `adjusting-entry` | Adjusting Entry | GL | ⭐⭐ |
+| 6 | `expense` | Expense Entry | GL | ⭐⭐⭐ |
+| 7 | `bank-recon` | Bank Reconciliation | Bank | ⭐⭐⭐ |
+| 8 | `deposit` | Deposit Record | Bank | ⭐⭐ |
+| 9 | `wire-transfer` | Wire Transfer (>{{FORMAT:APPROVAL_THRESHOLDS.DUAL_APPROVAL_THRESHOLD|currency}}) | Bank | ⭐⭐ |
+| 10 | `estimated-tax` | Estimated Tax Payment | Tax | ⭐⭐⭐ |
+| 11 | `1099-setup` | 1099-NEC Contractor Setup | Tax | ⭐⭐ |
+| 12 | `state-tax` | State Tax Payment | Tax | ⭐⭐⭐ |
+| 13 | `new-employee` | New Employee Setup | Payroll | ⭐⭐⭐ |
+| 14 | `payroll-run` | Process Payroll | Payroll | ⭐⭐⭐ |
+| 15 | `owner-comp` | Owner Compensation | Payroll | ⭐⭐⭐ |
+| 16 | `monthly-close` | Monthly Close Package | Reporting | ⭐⭐⭐ |
+| 17 | `financial-report` | Financial Reports | Reporting | ⭐⭐⭐ |
+| 18 | `variance` | Variance Analysis | Reporting | ⭐⭐ |
+
+---
+
+## 🗂️ JSON OUTPUT FORMAT (from "Export JSON" button)
+
+```json
+{
+  "task_type": "📥 Ghi nhận Vendor Invoice",
+  "form_id": "vendor-invoice",
+  "submitted_at": "{{COMPUTED:TODAY|iso_date}}T15:30:00.000Z",
+  "submitted_by": "{{OWNER.NAME}}",
+  "company": "{{COMPANY.LEGAL_NAME}}",
+  "fiscal_year": "FY{{FISCAL_YEAR.YEAR}}",
+  "data": {
+    "vendor_name": "ACME Office Supplies Inc.",
+    "invoice_number": "INV-{{FISCAL_YEAR.YEAR}}-0412",
+    "invoice_date": "{{FISCAL_YEAR.YEAR}}-04-15",
+    "due_date": "{{FISCAL_YEAR.YEAR}}-05-15",
+    "amount": "1234.56",
+    "category": "6010 - Office Supplies",
+    "payment_method": "Pending - Will pay later",
+    "description": "Office supplies for Q2 {{FISCAL_YEAR.YEAR}}",
+    "approval_needed": "{{FORMAT:APPROVAL_THRESHOLDS.TIER_1_MAX|currency}}-{{FORMAT:APPROVAL_THRESHOLDS.TIER_2_MAX|currency}} - Needs Manager approval"
+  }
+}
+```
+
+## 📝 MARKDOWN OUTPUT FORMAT (from "Copy to AI" button)
+
+```
+## 📥 Ghi nhận Vendor Invoice
+
+**Task:** Nhập hóa đơn mới từ nhà cung cấp
+**Submitted:** {{COMPUTED:TODAY|short_date}}, 3:30:00 PM
+
+- **Tên Nhà cung cấp (Vendor Name):** ACME Office Supplies Inc.
+- **Số Hóa đơn (Invoice #):** INV-{{FISCAL_YEAR.YEAR}}-0412
+- **Ngày Hóa đơn (Invoice Date):** {{FISCAL_YEAR.YEAR}}-04-15
+- **Ngày Đáo hạn (Due Date):** {{FISCAL_YEAR.YEAR}}-05-15
+- **Số tiền (Amount USD):** $1,234.56
+- **Loại Chi phí (Expense Category):** 6010 - Office Supplies
+- **Phương thức Thanh toán:** Pending - Will pay later
+- **Mô tả:** Office supplies for Q2 {{FISCAL_YEAR.YEAR}}
+- **Approval Status:** {{FORMAT:APPROVAL_THRESHOLDS.TIER_1_MAX|currency}}-{{FORMAT:APPROVAL_THRESHOLDS.TIER_2_MAX|currency}} - Needs Manager approval
+
+Please process this task per {{COMPANY.LEGAL_NAME}} accounting standards (GAAP + {{OPERATIONS.STATE_OF_OPERATION}} compliance).
+```
+
+---
+
+## 🤖 AI RESPONSE PROTOCOL — By Form Type
+
+### Form 1: `vendor-invoice`
+
+**AI MUST:**
+1. Generate journal entry:
+   ```
+   Dr. [Expense Category account]    $XXX.XX
+       Cr. 2000 - Accounts Payable          $XXX.XX
+   ```
+2. If `payment_method` ≠ "Pending" → also post payment JE
+3. If `amount` > {{FORMAT:APPROVAL_THRESHOLDS.CAPEX_THRESHOLD|currency}} and category ≠ 1500 → flag as potential CapEx
+4. Save PDF invoice to: `01_AP-AR_Management/Accounts_Payable/Vendor_Invoices/`
+5. Add row to AP Aging tracker
+6. Verify approval threshold met ({{APPROVAL_THRESHOLDS.PRESET}} preset)
+
+**File naming:** `YYYYMMDD_Invoice_[Vendor]_$[Amount].pdf`
+
+---
+
+### Form 2: `customer-invoice`
+
+**AI MUST:**
+1. Generate invoice PDF (use template, prefix `{{BRANDING.INVOICE_PREFIX}}`)
+2. Journal entry:
+   ```
+   Dr. 1200 - Accounts Receivable   $XXX.XX
+       Cr. [Revenue account]                $XXX.XX
+   ```
+3. If state sales tax applicable ({{OPERATIONS.STATE_OF_OPERATION}}) → add separate tax line per `_MODULES/state/{{OPERATIONS.STATE_OF_OPERATION}}.md#sales-tax`
+4. Save to: `01_AP-AR_Management/Accounts_Receivable/Customer_Invoices/`
+5. Update AR Aging tracker
+6. Schedule follow-up reminder based on payment terms
+
+---
+
+### Form 3: `aging-report`
+
+**AI MUST:**
+1. Pull data as of `as_of_date`
+2. Bucket receivables/payables per config
+3. Highlight amounts exceeding `highlight_threshold`
+4. Generate Excel report with:
+   - Customer/Vendor name
+   - Invoice #
+   - Invoice date
+   - Amount
+   - Days overdue
+   - Bucket assignment
+5. Save to: `01_AP-AR_Management/Accounts_[type]/Aging_Reports/`
+
+---
+
+### Form 4: `journal-entry`
+
+**AI MUST:**
+1. Validate: `debit_amount` = `credit_amount` (balanced)
+2. Validate: both accounts exist in Chart of Accounts (`{{CHART_OF_ACCOUNTS.FILE_PATH}}`)
+3. Post to General Ledger
+4. Save JE to: `02_General_Ledger/Journal_Entries/FY{{FISCAL_YEAR.YEAR}}_Q[X]/`
+5. Update Trial Balance
+
+**File naming:** `YYYYMMDD_JE-XXX_[Description].xlsx`
+
+---
+
+### Form 5: `adjusting-entry`
+
+**AI MUST:**
+1. Validate timing: must be within period-end close window
+2. Post adjusting entry
+3. If `reversing` = "Yes" → auto-create reversing JE for day 1 next period
+4. Flag as period-end adjustment in GL
+5. Update accrual/deferral tracking schedule
+
+---
+
+### Form 6: `expense`
+
+**AI MUST:**
+1. Determine deductibility:
+   - Meals & Entertainment: **50% deductible** per IRS
+   - Travel: 100% deductible
+   - Office supplies: 100% deductible
+2. If `receipt` = "No - Amount > $75" → FLAG: non-compliant with IRS Pub 463
+3. If `business_purpose` is vague → request clarification
+4. Journal entry:
+   ```
+   Dr. [Expense category]           $XXX.XX
+       Cr. [Payment source account]         $XXX.XX
+   ```
+
+---
+
+### Form 7: `bank-recon`
+
+**AI MUST:**
+1. Calculate:
+   ```
+   Adjusted Bank Balance = Bank Balance + Deposits in Transit - Outstanding Checks
+   Adjusted Book Balance = Book Balance + Interest Earned - Bank Fees
+   ```
+2. Verify: Adjusted Bank Balance = Adjusted Book Balance (to the cent)
+3. Post JEs for any unrecorded bank fees/interest
+4. Save recon worksheet to: `03_Bank_Reconciliation/Reconciliation_Reports/FY{{FISCAL_YEAR.YEAR}}/`
+
+**File naming:** `YYYYMM_BankRecon_[Bank]_[Account]Last4.xlsx`
+
+---
+
+### Form 8: `deposit`
+
+**AI MUST:**
+1. If source = "Customer Payment" → match to open invoice (reduce AR)
+2. Journal entry:
+   ```
+   Dr. [Deposit account]            $XXX.XX
+       Cr. 1200 - Accounts Receivable       $XXX.XX  (if customer)
+       OR Cr. 3000 - Common Stock           $XXX.XX  (if owner contribution)
+   ```
+
+---
+
+### Form 9: `wire-transfer`
+
+**AI MUST:**
+1. VERIFY: `approver_1` AND `approver_2` both populated (dual approval)
+2. VERIFY: Amount within approver_2's authority (CFO if <{{FORMAT:APPROVAL_THRESHOLDS.TIER_3_MAX|currency}}, CEO if >{{FORMAT:APPROVAL_THRESHOLDS.TIER_3_MAX|currency}})
+3. Post JE after wire initiated
+4. Save wire confirmation PDF
+5. Flag as significant transaction in month-end review
+
+---
+
+### Form 10: `estimated-tax`
+
+**AI MUST:**
+1. Validate quarter and due date alignment
+2. Apply state-specific rules: xem `_MODULES/state/{{OPERATIONS.STATE_OF_OPERATION}}.md#estimated-tax`
+3. Apply entity-specific rules: xem `_MODULES/entity/{{COMPANY.ENTITY_TYPE}}.md#estimated-tax`
+{{IF:COMPANY.ENTITY_TYPE IN ["S-Corp", "LLC-multi", "Partnership", "LLC-single", "Sole-Prop"]}}
+4. Pass-through entity → tax flows to owner/shareholder 1040-ES, NOT entity (except entity-level state taxes)
+{{ENDIF}}
+5. Journal entry:
+   ```
+   Dr. 1420 - Prepaid Taxes         $XXX.XX
+       Cr. [Cash account]                    $XXX.XX
+   ```
+6. Save to: `04_Tax_Compliance/Estimated_Tax_Payments/`
+7. Schedule reminder for next quarterly deadline
+
+---
+
+### Form 11: `1099-setup`
+
+**AI MUST:**
+1. If `w9_received` = "⚠️ BLOCKED" → **REFUSE to proceed**, require W-9 first
+2. Add contractor to 1099 tracking spreadsheet
+3. Monitor YTD payments: trigger 1099-NEC if >$600/year
+4. Save W-9 to: `04_Tax_Compliance/Form_1099/W-9_Forms/`
+
+---
+
+### Form 12: `state-tax`
+
+**AI MUST:**
+1. Identify state tax type per `_MODULES/state/{{OPERATIONS.STATE_OF_OPERATION}}.md`
+2. Validate amount per state minimum requirements
+3. Journal entry:
+   ```
+   Dr. 7500 - State Tax Expense   $XXX.XX
+       Cr. [Cash account]                  $XXX.XX
+   ```
+4. Save confirmation to: `04_Tax_Compliance/State_Tax/{{OPERATIONS.STATE_OF_OPERATION}}/`
+5. Remind: Due dates per state schedule
+
+---
+
+### Form 13: `new-employee`
+
+**AI MUST:**
+1. VERIFY: I-9 completed (3-day rule from hire_date)
+2. VERIFY: W-4 AND state withholding form on file (xem `_MODULES/state/{{OPERATIONS.STATE_OF_OPERATION}}.md#withholding-form`)
+3. Add to employee roster: `05_Payroll/Employees_Roster.xlsx`
+4. Calculate first paycheck withholding based on W-4
+5. Set up benefits deductions if elected
+
+---
+
+### Form 14: `payroll-run`
+
+**AI MUST:**
+1. Calculate per-employee:
+   - Gross wages
+   - Federal withholding (per W-4 + 2026 tables)
+   - State withholding (per state rules — `_MODULES/state/{{OPERATIONS.STATE_OF_OPERATION}}.md#withholding-tables`)
+   - FICA: SS 6.2% (cap $168,600), Medicare 1.45%
+   - State-specific: SDI/SUI/ETT per `_MODULES/state/{{OPERATIONS.STATE_OF_OPERATION}}.md#payroll-taxes`
+   - 401(k) deferrals (if elected)
+   - Net pay
+2. Calculate employer taxes:
+   - FUTA: 0.6% on first $7,000
+   - State SUI per state rules
+3. {{IF:COMPANY.ENTITY_TYPE == "S-Corp"}}If owner NOT on payroll → FLAG as reasonable comp risk{{ENDIF}}
+4. Generate payroll register + individual pay stubs
+5. Save to: `05_Payroll/Pay_Periods/FY{{FISCAL_YEAR.YEAR}}/`
+
+---
+
+### Form 15: `owner-comp` ⚠️ CRITICAL
+
+{{INCLUDE:_MODULES/entity/{{COMPANY.ENTITY_TYPE}}.md#owner-comp-protocol}}
+
+---
+
+### Form 16: `monthly-close`
+
+**AI MUST:**
+1. Execute close checklist:
+   - [ ] Bank reconciliation done
+   - [ ] AP/AR cut-off tested
+   - [ ] Accruals posted
+   - [ ] Depreciation posted (if applicable)
+   - [ ] Trial Balance reviewed
+2. Generate close package:
+   - Trial Balance
+   - P&L for the month
+   - Balance Sheet as of month-end
+   - Cash Flow (YTD)
+   - Variance vs budget
+3. Lock period in accounting system
+4. Save to: `06_Financial_Reporting/Monthly_Close/YYYY-MM/`
+
+---
+
+### Form 17: `financial-report`
+
+**AI MUST:**
+1. Generate requested reports per GAAP:
+   - P&L: Revenue - COGS - Opex - Other = Net Income
+   - Balance Sheet: MUST balance (Assets = Liabilities + Equity)
+   - Cash Flow: Indirect method starting from Net Income
+2. Apply comparison columns per user selection
+3. Save to: `06_Financial_Reporting/[report_type]/`
+
+**File naming:** `YYYYMMDD_[ReportType]_[Period].xlsx`
+
+---
+
+### Form 18: `variance`
+
+**AI MUST:**
+1. Calculate: Variance = Actual - Budget (positive = unfavorable for expenses)
+2. Calculate: Variance % = (Variance / Budget) × 100
+3. If abs(Variance %) > threshold → flag for investigation
+4. Categorize cause: one-time vs recurring
+5. Recommend action: re-forecast, budget amendment, or cost control
+6. Save to: `07_Budget_Variance_Analysis/Variance_Reports/`
+
+---
+
+## 🚨 GLOBAL VALIDATION RULES (apply to ALL forms)
+
+### Financial Data Integrity
+- **Currency:** All amounts in {{OPERATIONS.BASE_CURRENCY}}, format `$X,XXX.XX`
+- **Balance check:** Every journal entry must balance (Dr = Cr)
+- **Date validity:** Must be within current fiscal period unless adjusting entry
+- **Amount validation:** Must be positive unless noted
+
+### Approval Matrix Enforcement ({{APPROVAL_THRESHOLDS.PRESET}})
+| Amount | Required Approver |
+|--------|-------------------|
+| < {{FORMAT:APPROVAL_THRESHOLDS.TIER_1_MAX|currency}} | Staff accountant |
+| {{FORMAT:APPROVAL_THRESHOLDS.TIER_1_MAX|currency}} – {{FORMAT:APPROVAL_THRESHOLDS.TIER_2_MAX|currency}} | Manager / Controller |
+| {{FORMAT:APPROVAL_THRESHOLDS.TIER_2_MAX|currency}} – {{FORMAT:APPROVAL_THRESHOLDS.TIER_3_MAX|currency}} | CFO |
+| > {{FORMAT:APPROVAL_THRESHOLDS.TIER_3_MAX|currency}} | CEO / Board |
+
+### Entity Specific Rules ({{COMPANY.LEGAL_NAME}} is {{COMPANY.ENTITY_TYPE}})
+{{INCLUDE:_MODULES/entity/{{COMPANY.ENTITY_TYPE}}.md#validation-rules}}
+
+### State Specific Rules ({{FORMAT:OPERATIONS.STATE_OF_OPERATION|state_name}})
+{{INCLUDE:_MODULES/state/{{OPERATIONS.STATE_OF_OPERATION}}.md#validation-rules}}
+
+---
+
+## 🔄 BUSINESS CONTINUITY NOTES
+
+### If a new AI Agent takes over this workspace:
+
+1. **First action:** Read files in this order:
+   - `_BUSINESS_CONFIG.json` (master config)
+   - `AI_AGENT_MEMORY.md` (context)
+   - `COMPANY_PROFILE.md` (company data)
+   - `FORM_SCHEMA.md` (this file)
+   - `README.md` (workspace overview)
+
+2. **If user pastes form output:**
+   - Identify `form_id` from title line
+   - Look up response protocol in this document
+   - Execute per protocol
+   - Confirm action taken to user
+
+3. **If form breaks (HTML issue):**
+   - User can still manually format task requests per markdown templates shown above
+   - AI processes same way, regardless of input source
+
+4. **If Tailwind CDN becomes unavailable:**
+   - HTML still functions, just loses styling
+   - Consider creating offline version with inlined CSS
+
+---
+
+## 📝 CHANGE LOG
+
+| Date | Version | Change |
+|------|---------|--------|
+| {{COMPUTED:TODAY|iso_date}} | 2.0 | Generated from template v1.0.0 by mikenguyen.dev@gmail.com |
+
+---
+
+**Prepared by:** AI Accounting Controller — {{COMPANY.LEGAL_NAME}}
+**For:** {{OWNER.NAME}} ({{OWNER.EMAIL}}) + any future AI Agent successor
+**Confidentiality:** Internal use only — contains business process documentation

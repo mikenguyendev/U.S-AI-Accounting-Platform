@@ -1,0 +1,353 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aiacc.template/business-config.schema.json",
+  "title": "AI Accounting Template — Business Config",
+  "description": "Single source of truth cho 1 instance của template. AI Agent đọc file này để render workspace cá nhân hóa.",
+  "type": "object",
+  "required": ["schema_version", "company", "operations", "fiscal_year", "owner", "approval_thresholds", "compliance_status"],
+  "additionalProperties": false,
+
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Version của schema. Tăng khi breaking change."
+    },
+
+    "instance_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{3,50}$",
+      "description": "Snake-case identifier cho instance folder. Vd: Acme_Consulting_LLC."
+    },
+
+    "last_updated": {
+      "type": "string",
+      "format": "date",
+      "description": "ISO date config được cập nhật lần cuối."
+    },
+
+    "company": {
+      "type": "object",
+      "required": ["legal_name", "entity_type", "industry"],
+      "additionalProperties": false,
+      "properties": {
+        "legal_name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 200,
+          "description": "Tên pháp lý đầy đủ. Vd: 'Acme Consulting LLC'."
+        },
+        "dba": {
+          "type": ["string", "null"],
+          "description": "Doing Business As — tên thương mại nếu khác legal name."
+        },
+        "ein": {
+          "type": ["string", "null"],
+          "pattern": "^\\d{2}-\\d{7}$",
+          "description": "Federal EIN, format XX-XXXXXXX. Null nếu chưa có."
+        },
+        "entity_type": {
+          "type": "string",
+          "enum": ["C-Corp", "S-Corp", "LLC-single", "LLC-multi", "Partnership", "Sole-Prop"],
+          "description": "Loại pháp nhân. Quyết định tax form + owner comp rules."
+        },
+        "state_of_incorporation": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Z]{2}$",
+          "description": "2-letter state code nơi incorporate. Vd: DE, CA."
+        },
+        "date_of_incorporation": {
+          "type": ["string", "null"],
+          "format": "date",
+          "description": "Ngày thành lập, ISO format."
+        },
+        "industry": {
+          "type": "string",
+          "enum": ["Service", "Retail", "Restaurant", "Manufacturing", "SaaS"],
+          "description": "Ngành — quyết định COA template được dùng."
+        },
+        "industry_subtype": {
+          "type": ["string", "null"],
+          "description": "Tự do mô tả thêm. Vd: 'Hospitality consulting' nếu industry=Service."
+        }
+      }
+    },
+
+    "operations": {
+      "type": "object",
+      "required": ["state_of_operation", "accounting_software", "accounting_basis"],
+      "additionalProperties": false,
+      "properties": {
+        "state_of_operation": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "enum": [
+            "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA",
+            "HI","ID","IL","IN","IA","KS","KY","LA","ME","MD",
+            "MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ",
+            "NM","NY","NC","ND","OH","OK","OR","PA","RI","SC",
+            "SD","TN","TX","UT","VT","VA","WA","WV","WI","WY","DC"
+          ],
+          "description": "State chính nơi hoạt động. Quyết định state tax + payroll rules."
+        },
+        "additional_states": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Z]{2}$" },
+          "default": [],
+          "description": "Multi-state nexus. Mỗi state thêm = thêm filing requirement."
+        },
+        "city": { "type": ["string", "null"] },
+        "zip_code": { "type": ["string", "null"], "pattern": "^\\d{5}(-\\d{4})?$" },
+        "accounting_software": {
+          "type": "string",
+          "enum": ["Excel", "Google Sheets", "QuickBooks Online", "QuickBooks Desktop", "Xero", "NetSuite", "Wave", "Sage", "Other"]
+        },
+        "accounting_basis": {
+          "type": "string",
+          "enum": ["Accrual", "Cash", "Modified Cash"],
+          "description": "GAAP yêu cầu Accrual cho hầu hết entities. Cash chỉ OK nếu revenue <$27M (2026 limit)."
+        },
+        "base_currency": {
+          "type": "string",
+          "const": "USD",
+          "description": "Template hiện chỉ support USD."
+        }
+      }
+    },
+
+    "fiscal_year": {
+      "type": "object",
+      "required": ["year", "start_date", "end_date"],
+      "additionalProperties": false,
+      "properties": {
+        "year": {
+          "type": "integer",
+          "minimum": 2020,
+          "maximum": 2099,
+          "description": "Năm tài chính hiện tại."
+        },
+        "start_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Ngày đầu FY. Calendar year = YYYY-01-01."
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Ngày cuối FY. Calendar year = YYYY-12-31."
+        },
+        "is_calendar_year": {
+          "type": "boolean",
+          "default": true,
+          "description": "True nếu Jan 1 – Dec 31. False nếu fiscal year khác."
+        }
+      }
+    },
+
+    "owner": {
+      "type": "object",
+      "required": ["name", "email", "role", "preferred_language"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 2 },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": ["string", "null"] },
+        "role": {
+          "type": "string",
+          "enum": ["Owner", "Co-Owner", "CFO", "Controller", "Bookkeeper", "Office Manager"]
+        },
+        "preferred_language": {
+          "type": "string",
+          "enum": ["vi", "en", "vi-en"],
+          "description": "vi = Tiếng Việt only, en = English only, vi-en = bilingual (tiếng Việt + US accounting terms)."
+        },
+        "is_owner_employee": {
+          "type": "boolean",
+          "default": false,
+          "description": "True nếu owner cũng làm việc trong business (S-Corp reasonable comp rule applies)."
+        }
+      }
+    },
+
+    "approval_thresholds": {
+      "type": "object",
+      "required": ["preset"],
+      "additionalProperties": false,
+      "properties": {
+        "preset": {
+          "type": "string",
+          "enum": ["Conservative", "Moderate", "Aggressive", "Custom"],
+          "description": "Conservative=$1K/$10K/$50K, Moderate=$5K/$25K/$100K, Aggressive=$10K/$50K/$250K."
+        },
+        "tier_1_max": {
+          "type": "number",
+          "minimum": 0,
+          "description": "USD max cho staff approval. Vượt ngưỡng cần manager."
+        },
+        "tier_2_max": {
+          "type": "number",
+          "minimum": 0,
+          "description": "USD max cho manager approval. Vượt ngưỡng cần CFO."
+        },
+        "tier_3_max": {
+          "type": "number",
+          "minimum": 0,
+          "description": "USD max cho CFO approval. Vượt ngưỡng cần CEO/Board."
+        },
+        "dual_approval_threshold": {
+          "type": "number",
+          "default": 10000,
+          "description": "USD trên ngưỡng này cần 2 người approve (đặc biệt wire transfers)."
+        },
+        "capex_threshold": {
+          "type": "number",
+          "default": 2500,
+          "description": "USD trên ngưỡng này cân nhắc capitalize thay vì expense."
+        }
+      }
+    },
+
+    "bank_accounts": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object",
+        "required": ["gl_account", "account_type", "purpose"],
+        "additionalProperties": false,
+        "properties": {
+          "gl_account": { "type": "string", "pattern": "^\\d{4,5}$", "description": "COA account number, vd: 1010" },
+          "account_type": {
+            "type": "string",
+            "enum": ["Checking", "Savings", "Money Market", "Credit Card", "Line of Credit", "Loan"]
+          },
+          "bank_name": { "type": ["string", "null"] },
+          "account_number_last4": { "type": ["string", "null"], "pattern": "^\\d{4}$" },
+          "purpose": { "type": "string", "description": "Vd: 'Operating', 'Payroll', 'Tax Reserve'" },
+          "opened_date": { "type": ["string", "null"], "format": "date" },
+          "is_active": { "type": "boolean", "default": true }
+        }
+      }
+    },
+
+    "employees": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object",
+        "required": ["name", "employment_type"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "employee_id": { "type": ["string", "null"] },
+          "employment_type": {
+            "type": "string",
+            "enum": ["W-2 Full-time", "W-2 Part-time", "W-2 Owner-Employee", "Intern"]
+          },
+          "title": { "type": ["string", "null"] },
+          "department": { "type": ["string", "null"] },
+          "hire_date": { "type": ["string", "null"], "format": "date" },
+          "termination_date": { "type": ["string", "null"], "format": "date" },
+          "pay_type": { "type": "string", "enum": ["Salary", "Hourly"] },
+          "pay_rate": { "type": "number", "minimum": 0 },
+          "pay_frequency": {
+            "type": "string",
+            "enum": ["Weekly", "Bi-weekly", "Semi-monthly", "Monthly"]
+          },
+          "w4_filing_status": {
+            "type": ["string", "null"],
+            "enum": [null, "Single", "Married Filing Jointly", "Married Filing Separately", "Head of Household"]
+          },
+          "state_withholding_form_on_file": { "type": "boolean", "default": false },
+          "i9_completed": { "type": "boolean", "default": false },
+          "is_active": { "type": "boolean", "default": true }
+        }
+      }
+    },
+
+    "contractors": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object",
+        "required": ["name", "tax_id_type"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "description": "Legal name (individual) hoặc business name." },
+          "business_name": { "type": ["string", "null"] },
+          "tax_id_type": { "type": "string", "enum": ["SSN", "EIN", "ITIN"] },
+          "w9_received": { "type": "boolean", "default": false },
+          "w9_date": { "type": ["string", "null"], "format": "date" },
+          "services": { "type": ["string", "null"], "description": "Mô tả ngắn services provided." },
+          "ytd_payments": { "type": "number", "default": 0, "description": "Track để trigger 1099-NEC nếu >$600/year." },
+          "1099_required": { "type": "boolean", "default": false },
+          "is_active": { "type": "boolean", "default": true }
+        }
+      }
+    },
+
+    "compliance_status": {
+      "type": "object",
+      "description": "Track filing/registration status. AI Agent dùng để flag missing items.",
+      "additionalProperties": false,
+      "properties": {
+        "ein_obtained": { "type": "boolean", "default": false },
+        "boi_filed": { "type": ["boolean", "null"], "description": "FinCEN Beneficial Ownership Information report. Null nếu N/A (Sole Prop)." },
+        "boi_filed_date": { "type": ["string", "null"], "format": "date" },
+        "state_registration_complete": { "type": "boolean", "default": false },
+        "sales_tax_permit": { "type": ["boolean", "null"], "description": "Null nếu không bán taxable goods/services." },
+        "workers_comp_insurance": { "type": ["boolean", "null"], "description": "Null nếu chưa có employee." },
+        "general_liability_insurance": { "type": "boolean", "default": false },
+        "business_license": { "type": "boolean", "default": false },
+        "operating_agreement_or_bylaws": { "type": "boolean", "default": false },
+        "payroll_provider": {
+          "type": ["string", "null"],
+          "enum": [null, "Manual", "Gusto", "ADP", "Rippling", "Paychex", "QuickBooks Payroll", "OnPay", "Other"]
+        }
+      }
+    },
+
+    "chart_of_accounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "industry_template": {
+          "type": "string",
+          "enum": ["Service", "Retail", "Restaurant", "Manufacturing", "SaaS"],
+          "description": "Industry preset dùng làm base. Có thể override per-account."
+        },
+        "file_path": {
+          "type": "string",
+          "description": "Relative path đến COA Excel file trong instance folder."
+        },
+        "size": {
+          "type": "string",
+          "enum": ["Minimal", "Standard", "Extended"],
+          "default": "Standard",
+          "description": "Minimal=30-40 accounts, Standard=50-70, Extended=80-120."
+        },
+        "qbo_compatible_numbering": {
+          "type": "boolean",
+          "default": true,
+          "description": "True dùng 4-5 digit numbering tương thích QuickBooks Online (cho future migration)."
+        }
+      }
+    },
+
+    "branding": {
+      "type": "object",
+      "description": "Optional — dùng cho invoice/report header.",
+      "additionalProperties": false,
+      "properties": {
+        "logo_path": { "type": ["string", "null"] },
+        "primary_color_hex": { "type": ["string", "null"], "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "invoice_prefix": { "type": "string", "default": "INV-", "description": "Vd: 'INV-' → INV-2026-001" }
+      }
+    },
+
+    "custom_fields": {
+      "type": "object",
+      "description": "Escape hatch cho field không cover trong schema. Dùng sparingly.",
+      "additionalProperties": true
+    }
+  }
+}

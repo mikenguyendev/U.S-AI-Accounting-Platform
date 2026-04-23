@@ -1,0 +1,11 @@
+code,name,personal_income_tax_max,corporate_income_tax,franchise_tax_min,sales_tax_state,sales_tax_max,sdi,pfml,workers_comp_threshold,min_wage_2025,pte_election,key_filing_dates
+CA,California,13.30,8.84,800,7.25,10.75,Yes (1.1%),No,1+ employee,16.50,Yes,"Mar 15 (Form 100-S), Apr 15 (Form 100), Apr 15 ($800 franchise)"
+NY,New York,10.90,7.25,25,4.00,8.875,Yes ($31.20/yr),Yes (0.388%),1+ employee,16.50 (NYC/LI/Westchester),Yes,"Mar 15 (CT-3-S), Apr 15 (CT-3, IT-204-LL, NYC-2)"
+TX,Texas,0.00,0.00 (Margin Tax 0.375%-0.75%),0,6.25,8.25,No,No,Optional,7.25 (federal),N/A,"May 15 (Franchise + PIR), Quarterly C-3"
+FL,Florida,0.00,5.50 (C-Corp only),0,6.00,8.50,No,No,4+ employees (1+ construction),13.00,N/A,"May 1 (F-1120 C-Corp only), Apr 1 Tangible Property"
+DE,Delaware,6.60,8.70 (only if operating in DE),300 (LLC) / 400+ (Corp),0.00,0.00,No,No,1+ employee,13.25,No,"Mar 1 (Corp Franchise + Annual Report), Jun 1 (LLC Tax)"
+WA,Washington,0.00,0.00 (B&O 0.13%-3.3%),0,6.50,10.35,No,Yes (0.74%),1+ employee (L&I monopoly),16.66,N/A,"Quarterly Combined Excise + B&O, Apr 15 Capital Gains 7%"
+IL,Illinois,4.95,7.00 + 2.5% Replacement Tax,0,6.25,11.00,No,No,1+ employee,15.00 (Chicago $16.20),Yes,"Mar 15 (S-Corp + Replacement), Apr 15 (C-Corp)"
+GA,Georgia,5.39,5.39 + Net Worth Tax,10-5000,4.00,8.90,No,No,3+ employees,7.25 (federal),Yes,"Mar 15 (S-Corp), Apr 15 (C-Corp + Net Worth)"
+NJ,New Jersey,10.75,9.00 + 2.5% Surtax,375-2000,6.625,6.625 (uniform),No (eliminated 2023),Yes (0.09% FLI),1+ employee,15.49,Yes (BAIT),"Mar 15 (CBT-100S), Apr 15 (CBT-100, NJ-1040)"
+MA,Massachusetts,9.00 (5% + 4% Millionaire Tax),8.00 + Net Worth $2.60/$1K,456,6.25,7.00 (Boston meals),No,Yes (0.88%),1+ employee,15.00,Yes,"Mar 15 (Form 355S), Apr 15 (Form 355, Form 1)"

@@ -1,0 +1,15 @@
+Customer_ID,Customer_Name,Invoice_Number,Invoice_Date,Due_Date,Invoice_Amount,Amount_Paid,Balance_Due,Days_Overdue,Aging_Bucket,Payment_Terms,Contact,Notes,Collection_Status
+C-001,Acme Corp,INV-2026-001,2026-03-15,2026-04-14,5000.00,5000.00,0.00,-,Paid,Net 30,john@acme.com,,Collected
+C-002,Beta LLC,INV-2026-002,2026-03-20,2026-04-19,7500.00,0.00,7500.00,3,1-30 Days,Net 30,jane@beta.com,,Follow-up
+C-003,Gamma Inc,INV-2026-003,2026-03-25,2026-04-09,12000.00,0.00,12000.00,13,1-30 Days,Net 15,mike@gamma.com,First reminder sent,Reminder Sent
+C-004,Delta Partners,INV-2026-004,2026-02-28,2026-03-30,8500.00,0.00,8500.00,23,1-30 Days,Net 30,sara@delta.com,,2nd Notice
+C-005,Epsilon Co,INV-2026-005,2026-02-10,2026-03-12,3200.00,0.00,3200.00,41,31-60 Days,Net 30,tom@epsilon.com,Payment plan requested,Negotiating
+C-006,Zeta Group,INV-2026-006,2026-01-20,2026-02-19,15000.00,5000.00,10000.00,63,61-90 Days,Net 30,alex@zeta.com,Partial payment received,Collections
+C-007,Eta Services,INV-2026-007,2026-01-05,2026-02-04,6000.00,0.00,6000.00,78,61-90 Days,Net 30,ben@eta.com,,Collections
+C-008,Theta Industries,INV-2025-220,2025-10-15,2025-11-14,4500.00,0.00,4500.00,160,90+ Days,Net 30,lisa@theta.com,Bad debt candidate,Write-off Review
+,,,TOTALS:,,49700.00,10000.00,39700.00,,,,,,
+,,,CURRENT (Not Yet Due):,,5000.00,5000.00,0.00,,,,,,
+,,,1-30 DAYS:,,33200.00,0.00,33200.00,,,,,,
+,,,31-60 DAYS:,,3200.00,0.00,3200.00,,,,,,
+,,,61-90 DAYS:,,21000.00,5000.00,16000.00,,,,,,
+,,,90+ DAYS:,,4500.00,0.00,4500.00,,,,,,

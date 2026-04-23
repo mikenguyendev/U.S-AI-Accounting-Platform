@@ -1,0 +1,49 @@
+Section,Line_Item,Amount,Reference,Notes
+HEADER,Bank Name,,,
+HEADER,Account Number (last 4),,,
+HEADER,Statement Period,,,
+HEADER,Statement Date,,,
+,,,,
+BANK_BALANCE,Ending Balance per Bank Statement,,,From bank statement
+,,,,
+ADD_TO_BANK,Deposits in Transit,,,Deposits made but not cleared
+ADD_TO_BANK,Deposit 1,,,Date / Amount / Ref
+ADD_TO_BANK,Deposit 2,,,Date / Amount / Ref
+ADD_TO_BANK,TOTAL DEPOSITS IN TRANSIT,,,=SUM of deposits
+,,,,
+DEDUCT_FROM_BANK,Outstanding Checks,,,Checks issued but not cleared
+DEDUCT_FROM_BANK,Check #1001,,,Date / Payee / Amount
+DEDUCT_FROM_BANK,Check #1002,,,Date / Payee / Amount
+DEDUCT_FROM_BANK,ACH/Wire pending,,,
+DEDUCT_FROM_BANK,TOTAL OUTSTANDING CHECKS,,,=SUM of outstanding
+,,,,
+ADJUSTED_BANK,ADJUSTED BANK BALANCE,,,=Bank Balance + Deposits - Outstanding
+,,,,
+BOOK_BALANCE,Ending Balance per Books (GL),,,Per Trial Balance 1010
+,,,,
+ADD_TO_BOOK,Interest Earned (unrecorded),,,Not yet in GL
+ADD_TO_BOOK,Credits / Refunds received,,,Not yet in GL
+ADD_TO_BOOK,TOTAL ADDITIONS TO BOOK,,,=SUM
+,,,,
+DEDUCT_FROM_BOOK,Bank Fees (unrecorded),,,Service charges
+DEDUCT_FROM_BOOK,NSF Checks (bounced customer checks),,,
+DEDUCT_FROM_BOOK,Returned Check Fees,,,
+DEDUCT_FROM_BOOK,Book Errors (transcription errors),,,
+DEDUCT_FROM_BOOK,TOTAL DEDUCTIONS FROM BOOK,,,=SUM
+,,,,
+ADJUSTED_BOOK,ADJUSTED BOOK BALANCE,,,=Book Balance + Additions - Deductions
+,,,,
+VERIFICATION,Adjusted Bank Balance,,,
+VERIFICATION,Adjusted Book Balance,,,
+VERIFICATION,DIFFERENCE,,,=should be $0.00
+VERIFICATION,STATUS,,,RECONCILED / INVESTIGATE
+,,,,
+ADJUSTING_JE,Journal Entries to Record,,,
+ADJUSTING_JE,JE for Interest Earned,,,"Dr. Cash / Cr. Interest Income"
+ADJUSTING_JE,JE for Bank Fees,,,"Dr. Bank Fees / Cr. Cash"
+ADJUSTING_JE,JE for NSF Check,,,"Dr. AR / Cr. Cash"
+,,,,
+SIGNOFF,Prepared By,,,
+SIGNOFF,Prepared Date,,,
+SIGNOFF,Reviewed By,,,
+SIGNOFF,Reviewed Date,,,

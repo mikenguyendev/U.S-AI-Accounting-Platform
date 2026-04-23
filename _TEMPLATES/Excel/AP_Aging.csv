@@ -1,0 +1,16 @@
+Vendor_ID,Vendor_Name,Invoice_Number,Invoice_Date,Due_Date,Invoice_Amount,Amount_Paid,Balance_Due,Days_Until_Due,Aging_Bucket,Payment_Terms,1099_Required,Approval_Status,Payment_Method,Notes
+V-001,Office Supply Co,INV-OS-4421,2026-04-10,2026-05-10,850.00,0.00,850.00,18,Current,Net 30,No,Approved,ACH,
+V-002,Adobe Systems,INV-AD-89021,2026-04-12,2026-04-26,599.88,0.00,599.88,4,Current,Net 14,No,Approved,Credit Card,Annual subscription
+V-003,Legal Counsel LLC,INV-LC-225,2026-04-01,2026-05-01,2500.00,0.00,2500.00,9,Current,Net 30,Yes,Pending Approval,Check,Review before paying
+V-004,ACME Hosting,INV-AH-891,2026-03-25,2026-04-24,199.00,0.00,199.00,2,Current,Net 30,No,Approved,Credit Card,Monthly hosting
+V-005,Marketing Agency,INV-MA-445,2026-03-15,2026-04-14,5000.00,0.00,5000.00,-8,1-30 Days Overdue,Net 30,Yes,Approved,ACH,
+V-006,Consultant Jane,INV-JANE-88,2026-03-01,2026-03-31,3500.00,0.00,3500.00,-22,1-30 Days Overdue,Net 30,Yes,Approved,Check,Need to issue check
+V-007,Office Rent,INV-RENT-APR,2026-04-01,2026-04-01,4500.00,0.00,4500.00,-22,1-30 Days Overdue,Due on Receipt,No,Approved,ACH,Late - LL calling
+V-008,Cleaning Service,INV-CS-120,2026-02-20,2026-03-22,600.00,0.00,600.00,-31,31-60 Days Overdue,Net 30,Yes,Approved,Check,Need payment now
+V-009,IT Support,INV-IT-445,2026-01-15,2026-02-14,1800.00,0.00,1800.00,-67,61-90 Days Overdue,Net 30,No,Approved,Check,Vendor threatening service cutoff
+,,,TOTALS:,,19548.88,0.00,19548.88,,,,,,,,
+,,,CURRENT:,,4148.88,0.00,4148.88,,,,,,,,
+,,,1-30 DAYS OVERDUE:,,13000.00,0.00,13000.00,,,,,,,,
+,,,31-60 DAYS OVERDUE:,,600.00,0.00,600.00,,,,,,,,
+,,,61-90 DAYS OVERDUE:,,1800.00,0.00,1800.00,,,,,,,,
+,,,90+ DAYS OVERDUE:,,0.00,0.00,0.00,,,,,,,,

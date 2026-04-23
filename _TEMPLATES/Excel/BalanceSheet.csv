@@ -1,0 +1,85 @@
+Section,Line_Item,Account_Numbers,Current_Period,Prior_Period,Change_Dollar,Change_Pct,Notes
+HEADER,Company Name,,,,,,
+HEADER,Balance Sheet,,,,,,
+HEADER,As of: [Date],,,,,,
+,,,,,,,
+ASSETS,ASSETS,,,,,,
+CURRENT_ASSETS,Current Assets,,,,,,
+CURRENT_ASSETS,Cash - Operating Checking,1010,,,,,
+CURRENT_ASSETS,Cash - Savings,1020,,,,,
+CURRENT_ASSETS,Cash - Payroll Account,1030,,,,,
+CURRENT_ASSETS,Petty Cash,1040,,,,,
+CURRENT_ASSETS,Accounts Receivable,1100,,,,,
+CURRENT_ASSETS,Less: Allowance for Doubtful Accounts,1110,,,,,Contra-asset
+CURRENT_ASSETS,Net Accounts Receivable,,,,,,=AR - Allowance
+CURRENT_ASSETS,Inventory,1200,,,,,If applicable
+CURRENT_ASSETS,Prepaid Expenses,1200-1230,,,,,
+CURRENT_ASSETS,Other Current Assets,,,,,,
+SUBTOTAL,TOTAL CURRENT ASSETS,,,,,,=SUM
+,,,,,,,
+FIXED_ASSETS,Fixed Assets,,,,,,
+FIXED_ASSETS,Land,1500,,,,,Not depreciated
+FIXED_ASSETS,Buildings,1510,,,,,
+FIXED_ASSETS,Computer Equipment,1510,,,,,
+FIXED_ASSETS,Office Equipment,1520,,,,,
+FIXED_ASSETS,Furniture and Fixtures,1500,,,,,
+FIXED_ASSETS,Vehicles,1530-1560,,,,,
+FIXED_ASSETS,Leasehold Improvements,1530-1580,,,,,
+FIXED_ASSETS,Less: Accumulated Depreciation,1590,,,,,Contra-asset
+SUBTOTAL,NET FIXED ASSETS,,,,,,=Gross - AccDep
+,,,,,,,
+OTHER_ASSETS,Other Assets,,,,,,
+OTHER_ASSETS,Security Deposits,1700,,,,,
+OTHER_ASSETS,Goodwill,1710,,,,,If any
+OTHER_ASSETS,Intangible Assets,1710-1740,,,,,Net of amortization
+SUBTOTAL,TOTAL OTHER ASSETS,,,,,,=SUM
+,,,,,,,
+TOTAL_ASSETS,TOTAL ASSETS,,,,,,=Current + Fixed + Other
+,,,,,,,
+LIABILITIES,LIABILITIES AND EQUITY,,,,,,
+CURRENT_LIABILITIES,Current Liabilities,,,,,,
+CURRENT_LIABILITIES,Accounts Payable,2010,,,,,
+CURRENT_LIABILITIES,Credit Card Payable,2100,,,,,
+CURRENT_LIABILITIES,Accrued Expenses,2200,,,,,
+CURRENT_LIABILITIES,Accrued Salaries and Wages,2210,,,,,
+CURRENT_LIABILITIES,Accrued Vacation/PTO,2220,,,,,
+CURRENT_LIABILITIES,Payroll Taxes Withheld,2310-2360,,,,,All payroll liability lines
+CURRENT_LIABILITIES,Sales Tax Payable,2400,,,,,
+CURRENT_LIABILITIES,Income Tax Payable,2500,,,,,
+CURRENT_LIABILITIES,Notes Payable - Short-term,2600,,,,,Due within 12 months
+CURRENT_LIABILITIES,Deferred Revenue - Current,2700,,,,,
+CURRENT_LIABILITIES,Customer Deposits,2700,,,,,
+CURRENT_LIABILITIES,Gift Cards Outstanding,2710,,,,,
+SUBTOTAL,TOTAL CURRENT LIABILITIES,,,,,,=SUM
+,,,,,,,
+LONG_TERM_LIABILITIES,Long-Term Liabilities,,,,,,
+LONG_TERM_LIABILITIES,Notes Payable - Long-term,2800,,,,,Due >12 months
+LONG_TERM_LIABILITIES,Mortgage Payable,2820,,,,,
+LONG_TERM_LIABILITIES,Deferred Revenue - Long-term,2710,,,,,
+LONG_TERM_LIABILITIES,Convertible Notes / SAFEs,2810,,,,,If SaaS
+SUBTOTAL,TOTAL LONG-TERM LIABILITIES,,,,,,=SUM
+,,,,,,,
+TOTAL_LIABILITIES,TOTAL LIABILITIES,,,,,,=Current + Long-term
+,,,,,,,
+EQUITY,Shareholders' Equity,,,,,,
+EQUITY,Common Stock,3010,,,,,
+EQUITY,Preferred Stock,3020,,,,,If C-Corp/SaaS
+EQUITY,Additional Paid-in Capital (APIC),3020-3030,,,,,
+EQUITY,Retained Earnings,3030,,,,,Beginning + Net Income - Distributions
+EQUITY,Current Year Net Income,,,,,,=From P&L
+EQUITY,Distributions/Dividends,3040,,,,,Contra-equity
+EQUITY,Treasury Stock,3070,,,,,Contra-equity (if buyback)
+SUBTOTAL,TOTAL EQUITY,,,,,,=SUM
+,,,,,,,
+TOTAL_LE,TOTAL LIABILITIES AND EQUITY,,,,,,=Liabilities + Equity
+,,,,,,,
+VERIFICATION,Total Assets,,,,,,
+VERIFICATION,Total Liabilities + Equity,,,,,,
+VERIFICATION,DIFFERENCE,,,,,,=should be $0.00
+VERIFICATION,STATUS,,,,,,BALANCED / NOT BALANCED
+,,,,,,,
+RATIOS,Key Ratios,,,,,,
+RATIOS,Current Ratio,,,,,,=Current Assets / Current Liabilities
+RATIOS,Quick Ratio,,,,,,=(Current Assets - Inventory) / Current Liabilities
+RATIOS,Debt-to-Equity Ratio,,,,,,=Total Liabilities / Total Equity
+RATIOS,Working Capital,,,,,,=Current Assets - Current Liabilities

@@ -1,0 +1,104 @@
+Our_Account_Type,Our_Subtype,QBO_Account_Type,QBO_Detail_Type,Notes
+Asset,Current Asset,Bank,Checking,Use for cash checking accounts (1010-series)
+Asset,Current Asset,Bank,Savings,Use for cash savings accounts (1020-series)
+Asset,Current Asset,Bank,Money Market,Use for money market accounts
+Asset,Current Asset,Bank,Cash on hand,Use for petty cash (1040)
+Asset,Current Asset,Other Current Assets,Undeposited Funds,QBO-specific holding account
+Asset,Current Asset,Accounts receivable (A/R),Accounts Receivable (A/R),Use for AR (1100)
+Asset,Current Asset,Other Current Assets,Allowance for Bad Debts,Use for AR allowance (1110) — contra
+Asset,Current Asset,Other Current Assets,Inventory,QBO has own Inventory type — use for 1200
+Asset,Current Asset,Other Current Assets,Prepaid Expenses,Use for 1200-series prepaid
+Asset,Current Asset,Other Current Assets,Loans to Officers,Use for owner loans/advances
+Asset,Current Asset,Other Current Assets,Other Current Assets,Catch-all for misc current assets
+Asset,Fixed Asset,Fixed Assets,Furniture & Fixtures,Use for 1500
+Asset,Fixed Asset,Fixed Assets,Machinery & Equipment,Use for production equipment (1520-1530)
+Asset,Fixed Asset,Fixed Assets,Buildings,Use for owned buildings (1510)
+Asset,Fixed Asset,Fixed Assets,Land,Use for land (1500 in Manufacturing) — NOT depreciated
+Asset,Fixed Asset,Fixed Assets,Vehicles,Use for vehicles (1530-1560)
+Asset,Fixed Asset,Fixed Assets,Leasehold Improvements,Use for buildouts (1540)
+Asset,Fixed Asset,Fixed Assets,Computer Equipment,Use for computers (1510)
+Asset,Accumulated Depreciation,Fixed Assets,Accumulated Depreciation,Use for 1590 — contra-asset
+Asset,Other Asset,Other Assets,Security Deposits,Use for security deposits (1700)
+Asset,Intangible Asset,Other Assets,Goodwill,Use for goodwill (1710)
+Asset,Intangible Asset,Other Assets,Intangible Assets,Use for patents IP capitalized software (1710-1720)
+Liability,Current Liability,Accounts Payable (A/P),Accounts Payable (A/P),Use for AP (2010-2020)
+Liability,Current Liability,Credit Card,Credit Card,Use for credit cards (2100-2110)
+Liability,Current Liability,Other Current Liabilities,Federal Income Tax Withholding,Use for 2310
+Liability,Current Liability,Other Current Liabilities,FICA & Medicare,Use for 2320 2330
+Liability,Current Liability,Other Current Liabilities,State/Local Income Tax,Use for 2340
+Liability,Current Liability,Other Current Liabilities,Federal Unemployment,Use for 2360
+Liability,Current Liability,Other Current Liabilities,State Unemployment,Use for 2350
+Liability,Current Liability,Other Current Liabilities,Sales Tax Payable,Use for 2400-2420
+Liability,Current Liability,Other Current Liabilities,Income Tax Payable,Use for 2500
+Liability,Current Liability,Other Current Liabilities,Loan Payable,Use for short-term notes (2600)
+Liability,Current Liability,Other Current Liabilities,Deferred Revenue,Use for 2700 (current portion)
+Liability,Current Liability,Other Current Liabilities,Customer Deposits,Use for 2700 customer deposits
+Liability,Current Liability,Other Current Liabilities,Accrued Liabilities,Use for 2200-series accrued
+Liability,Current Liability,Other Current Liabilities,Wages Payable,Use for 2210
+Liability,Current Liability,Other Current Liabilities,Other Current Liabilities,Catch-all (gift cards 2710 etc.)
+Liability,Long-term Liability,Long Term Liabilities,Notes Payable,Use for long-term loans (2800)
+Liability,Long-term Liability,Long Term Liabilities,Mortgages,Use for mortgages (2820)
+Liability,Long-term Liability,Long Term Liabilities,Deferred Revenue,Use for 2710 long-term portion
+Liability,Long-term Liability,Long Term Liabilities,Other Long Term Liabilities,Catch-all (convertibles 2810 etc.)
+Equity,Common Stock,Equity,Common Stock,Use for 3010
+Equity,Preferred Stock,Equity,Preferred Stock,Use for 3020 (C-Corp/SaaS only)
+Equity,Additional Paid-in Capital,Equity,Paid-In Capital or Surplus,Use for 3020-3030 APIC
+Equity,Retained Earnings,Equity,Retained Earnings,Use for 3030 (auto-created in QBO)
+Equity,Distributions,Equity,Owner's Equity,Use for 3040 distributions
+Equity,Distributions,Equity,Partner Distributions,Use for partnership distributions
+Equity,Owner's Equity,Equity,Owner's Equity,Use for 3050 (sole prop / LLC-single)
+Equity,Owner's Equity,Equity,Opening Balance Equity,Use for opening balance setup (QBO-specific)
+Equity,Treasury Stock,Equity,Treasury Stock,Use for buybacks (3070 in SaaS)
+Revenue,Service Revenue,Income,Service/Fee Income,Use for service revenue (4010-4040)
+Revenue,Product Revenue,Income,Sales of Product Income,Use for product sales (4010-4080 retail/restaurant/manufacturing)
+Revenue,Subscription Revenue,Income,Service/Fee Income,Use for subscription revenue (4010-4040 SaaS)
+Revenue,Other Revenue,Income,Other Primary Income,Use for shipping revenue 4050 etc.
+Revenue,Service Revenue,Income,Discounts/Refunds Given,Use for sales returns/discounts (4090 4095) — contra
+COGS,Cost of Goods Sold,Cost of Goods Sold,Cost of labor - COS,Use for direct labor in services
+COGS,Cost of Goods Sold,Cost of Goods Sold,Equipment Rental - COS,Use for production equipment rental
+COGS,Cost of Goods Sold,Cost of Goods Sold,Other Costs of Service - COS,Use for misc service costs
+COGS,Cost of Goods Sold,Cost of Goods Sold,Supplies & Materials - COGS,Use for direct materials
+COGS,Cost of Goods Sold,Cost of Goods Sold,Cost of Goods Sold,Primary COGS for product sales
+COGS,Cost of Services,Cost of Goods Sold,Cost of Labor,Use for service labor
+COGS,Direct Materials,Cost of Goods Sold,Supplies & Materials,Use for manufacturing materials (5010)
+COGS,Direct Labor,Cost of Goods Sold,Cost of Labor,Use for direct labor (5020 mfg)
+COGS,Manufacturing Overhead,Cost of Goods Sold,Other Costs of Service - COS,Use for manufacturing OH (5030 5100-5150)
+Expense,Salaries and Wages,Expenses,Payroll Expenses,Use for salaries 6010-6030
+Expense,Salaries and Wages,Expenses,Officer Wages,Use for officer comp (6020) — separate tracking required
+Expense,Salaries and Wages,Expenses,Payroll Tax Expenses,Use for employer taxes (6030 6040)
+Expense,Salaries and Wages,Expenses,Insurance - Employee Health,Use for health insurance (6040)
+Expense,Salaries and Wages,Expenses,Pension/Profit-Sharing/Annuity,Use for 401(k) match (6050 6080)
+Expense,Salaries and Wages,Expenses,Employee Benefits,Use for other benefits (6060 6070)
+Expense,Rent,Expenses,Rent or Lease of Buildings,Use for office/store rent (6100-6110)
+Expense,Rent,Expenses,Rent or Lease of Vehicles Equipment,Use for equipment rent
+Expense,Utilities,Expenses,Utilities,Use for utilities (6200-6210)
+Expense,Office Expense,Expenses,Office/General Administrative Expenses,Use for office supplies (6300)
+Expense,Office Expense,Expenses,Software,Use for software subscriptions (6310 6300 in SaaS)
+Expense,Office Expense,Expenses,Repair & Maintenance,Use for repairs (6320 6830 6820)
+Expense,Office Expense,Expenses,Supplies,Use for office supplies (6300)
+Expense,Professional Services,Expenses,Legal & Professional Fees,Use for legal/accounting/consulting (6400-6430)
+Expense,Marketing,Expenses,Advertising/Promotional,Use for advertising (6500-6540)
+Expense,Marketing,Expenses,Promotional,Use for promotional materials
+Expense,Marketing,Expenses,Travel Meals,Use for marketing-related travel
+Expense,Travel and Meals,Expenses,Travel,Use for business travel (6600)
+Expense,Travel and Meals,Expenses,Travel Meals,Use for meals 50% deductible (6610)
+Expense,Travel and Meals,Expenses,Entertainment Meals,Use for client entertainment (6620)
+Expense,Insurance,Expenses,Insurance - General Liability,Use for GL insurance (6700)
+Expense,Insurance,Expenses,Insurance - Workers' Compensation,Use for workers comp (6710)
+Expense,Insurance,Expenses,Insurance - Liability,Use for product/E&O/professional (6720)
+Expense,Insurance,Expenses,Insurance - Property,Use for property/cargo (6730 6740)
+Expense,Depreciation,Expenses,Depreciation,Use for depreciation expense (6850)
+Expense,Other Operating Expense,Expenses,Bank Charges,Use for bank fees (6800)
+Expense,Other Operating Expense,Expenses,Bank Charges,Use for credit card processing fees (6810)
+Expense,Other Operating Expense,Expenses,Charitable Contributions,Use for donations (6840)
+Expense,Other Operating Expense,Expenses,Dues & subscriptions,Use for memberships (6820)
+Expense,Other Operating Expense,Expenses,Education,Use for continuing ed (6830)
+Expense,Other Operating Expense,Expenses,Other Miscellaneous Service Cost,Use for misc compliance/regulatory
+Expense,Other Operating Expense,Expenses,Other Business Expenses,Catch-all
+Other_Income,Interest Income,Other Income,Interest Earned,Use for interest income (7010)
+Other_Income,Other Operating Expense,Other Income,Other Investment Income,Use for misc other income (7020)
+Other_Income,Other Operating Expense,Other Income,Tax-Exempt Interest,Use for muni bond interest if any
+Other_Expense,Interest Expense,Other Expense,Interest Paid,Use for interest expense (7100)
+Other_Expense,Tax Expense,Other Expense,Federal Tax,Use for federal income tax (7200)
+Other_Expense,Tax Expense,Other Expense,Other Taxes,Use for state/franchise tax (7210 7220)
+Other_Expense,Gain/Loss on Sale of Assets,Other Expense,Other Expense,Use for asset sale loss (7300)

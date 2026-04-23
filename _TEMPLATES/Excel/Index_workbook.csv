@@ -1,0 +1,15 @@
+Template_Number,Template_Name,File_Name,Setup_Guide,Update_Cadence,Used_For,Storage_Location,Dependencies,Output_Forms
+01,Journal Entry,JournalEntry.csv,JournalEntry.md,Per transaction,Recording all financial events,02_General_Ledger/Journal_Entries/FY{year}_Q{quarter}/,COA,Trial Balance
+02,Trial Balance,TrialBalance.csv,TrialBalance.md,Daily during close monthly sign-off,Verify all accounts balance before financial statements,06_Financial_Reporting/Monthly_Close/{YYYY-MM}/,Journal Entries + Opening Balances,P&L + Balance Sheet
+03,Bank Reconciliation,BankReconciliation.csv,BankReconciliation.md,Monthly per account,Reconcile bank statement to GL cash balance,03_Bank_Reconciliation/Reconciliation_Reports/FY{year}/,Bank statements + GL cash account,Adjusting JEs
+04,AR Aging,AR_Aging.csv,AR_Aging.md,Weekly,Track customer receivables by age + collections,01_AP-AR_Management/Accounts_Receivable/Aging_Reports/,Invoice records,Bad debt analysis
+05,AP Aging,AP_Aging.csv,AP_Aging.md,Weekly,Track vendor payables + cash management,01_AP-AR_Management/Accounts_Payable/,Vendor invoices,1099 tracking + cash forecast
+06,Profit & Loss,P&L.csv,P&L.md,Monthly,Income Statement (Revenue - COGS - OpEx = Net Income),06_Financial_Reporting/Profit_and_Loss/,Trial Balance,Net Income flow to Balance Sheet
+07,Balance Sheet,BalanceSheet.csv,BalanceSheet.md,Monthly at period end,Snapshot of Assets Liabilities Equity (must balance),06_Financial_Reporting/Balance_Sheet/,Trial Balance + P&L Net Income,Cash Flow Statement
+08,Cash Flow Statement,CashFlow.csv,CashFlow.md,Quarterly minimum,Reconcile Net Income to actual cash via Indirect Method,06_Financial_Reporting/Cash_Flow_Statement/,P&L + Current and Prior Balance Sheets,Free Cash Flow analysis
+09,Payroll Register,PayrollRegister.csv,PayrollRegister.md,Per pay period,Calculate gross pay taxes deductions and net pay,05_Payroll/Pay_Periods/FY{year}/,Employee roster + W-4/state W-4,941 quarterly + W-2 annual + JE
+10,Budget vs Actual,BudgetVsActual.csv,BudgetVsActual.md,Monthly post P&L finalization,Variance analysis Actual vs Budget + reforecast,07_Budget_Variance_Analysis/Variance_Reports/,Annual budget + P&L,Action items + reforecast
+,,,,,,,,,
+,Setup Guide,_EXCEL_TEMPLATES_GUIDE.md,,,,,,
+,COA Schema,_COA_SCHEMA.md,,,,_TEMPLATES/COA/,,
+,QBO Mapping,_QBO_MAPPING.csv,,,,_TEMPLATES/COA/,,

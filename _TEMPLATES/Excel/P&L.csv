@@ -1,0 +1,66 @@
+Section,Line_Item,Account_Numbers,Current_Month,YTD,Prior_Year_Same_Period,Variance_vs_Prior,Variance_Pct,Budget_YTD,Variance_vs_Budget,Notes
+HEADER,Company Name,,,,,,,,,
+HEADER,Income Statement,,,,,,,,,
+HEADER,For Month Ended: [Date],,,,,,,,,
+,,,,,,,,,,
+REVENUE,Service Revenue - Consulting,4010,,,,,,,,
+REVENUE,Service Revenue - Project,4020,,,,,,,,
+REVENUE,Service Revenue - Subscription,4030,,,,,,,,
+REVENUE,Service Revenue - Hourly,4040,,,,,,,,
+REVENUE,Sales Returns and Allowances,4090,,,,,,,,Contra-revenue
+SUBTOTAL,TOTAL REVENUE,,,,,,,,,=SUM of above
+,,,,,,,,,,
+COGS,Cost of Services - Subcontractors,5010,,,,,,,,
+COGS,Cost of Services - Materials,5020,,,,,,,,
+COGS,Cost of Services - Direct Labor,5030,,,,,,,,
+SUBTOTAL,TOTAL COGS,,,,,,,,,=SUM of COGS
+,,,,,,,,,,
+CALCULATION,GROSS PROFIT,,,,,,,,,=Revenue - COGS
+CALCULATION,Gross Profit Margin %,,,,,,,,,=Gross Profit / Revenue
+,,,,,,,,,,
+OPERATING_EXPENSES,Salaries and Wages,6010,,,,,,,,
+OPERATING_EXPENSES,Officer Compensation,6020,,,,,,,,
+OPERATING_EXPENSES,Payroll Tax Expense,6030,,,,,,,,
+OPERATING_EXPENSES,Employee Benefits - Health,6040,,,,,,,,
+OPERATING_EXPENSES,401(k) Match,6050,,,,,,,,
+OPERATING_EXPENSES,Rent - Office,6100,,,,,,,,
+OPERATING_EXPENSES,Utilities,6200,,,,,,,,
+OPERATING_EXPENSES,Telephone and Internet,6210,,,,,,,,
+OPERATING_EXPENSES,Office Supplies,6300,,,,,,,,
+OPERATING_EXPENSES,Software and Subscriptions,6310,,,,,,,,
+OPERATING_EXPENSES,Professional Services - Legal,6400,,,,,,,,
+OPERATING_EXPENSES,Professional Services - Accounting,6410,,,,,,,,
+OPERATING_EXPENSES,Marketing and Advertising,6500,,,,,,,,
+OPERATING_EXPENSES,Travel,6600,,,,,,,,
+OPERATING_EXPENSES,Meals (50% Deductible),6610,,,,,,,,
+OPERATING_EXPENSES,Insurance,6700-6720,,,,,,,,Combined insurance
+OPERATING_EXPENSES,Bank Fees,6800,,,,,,,,
+OPERATING_EXPENSES,Depreciation,6850,,,,,,,,
+OPERATING_EXPENSES,Other Operating Expenses,6900,,,,,,,,
+SUBTOTAL,TOTAL OPERATING EXPENSES,,,,,,,,,=SUM
+,,,,,,,,,,
+CALCULATION,OPERATING INCOME (EBIT),,,,,,,,,=Gross Profit - OpEx
+CALCULATION,Operating Margin %,,,,,,,,,=Operating Income / Revenue
+,,,,,,,,,,
+OTHER_INCOME,Interest Income,7010,,,,,,,,
+OTHER_INCOME,Other Income,7020,,,,,,,,
+OTHER_EXPENSE,Interest Expense,7100,,,,,,,,
+SUBTOTAL,NET OTHER INCOME (EXPENSE),,,,,,,,,=Other Income - Other Expense
+,,,,,,,,,,
+CALCULATION,INCOME BEFORE TAXES,,,,,,,,,=Operating Income + Other Income - Other Expense
+,,,,,,,,,,
+TAX,Federal Income Tax Expense,7200,,,,,,,,
+TAX,State Income Tax Expense,7210,,,,,,,,
+TAX,State Franchise Tax,7220,,,,,,,,
+SUBTOTAL,TOTAL TAX EXPENSE,,,,,,,,,
+,,,,,,,,,,
+CALCULATION,NET INCOME,,,,,,,,,=Income Before Tax - Tax
+CALCULATION,Net Profit Margin %,,,,,,,,,=Net Income / Revenue
+,,,,,,,,,,
+EBITDA_RECON,Net Income,,,,,,,,,
+EBITDA_RECON,+ Interest Expense,,,,,,,,,
+EBITDA_RECON,+ Taxes,,,,,,,,,
+EBITDA_RECON,+ Depreciation,,,,,,,,,
+EBITDA_RECON,+ Amortization,,,,,,,,,
+EBITDA_RECON,EBITDA,,,,,,,,,
+EBITDA_RECON,EBITDA Margin %,,,,,,,,,

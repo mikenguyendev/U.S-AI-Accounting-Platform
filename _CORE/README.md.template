@@ -1,0 +1,311 @@
+# {{COMPANY.LEGAL_NAME}} — AI Accounting Controller Workspace
+
+> **Tài liệu bàn giao cho AI Agent kế nhiệm / Nhân sự kế toán mới**
+> *Handoff Document for Next AI Agent / New Accounting Staff*
+
+**Last Updated:** {{COMPUTED:TODAY|long_date}}
+**Fiscal Year:** FY{{FISCAL_YEAR.YEAR}}
+**Base Currency:** {{OPERATIONS.BASE_CURRENCY}} ($)
+**Compliance Framework:** US GAAP + IRS Regulations
+**Entity Type:** {{COMPANY.ENTITY_TYPE}}
+**State of Operation:** {{FORMAT:OPERATIONS.STATE_OF_OPERATION|state_name}} ({{OPERATIONS.STATE_OF_OPERATION}})
+
+---
+
+## 1. Mission & Context (Bối cảnh dự án)
+
+Đây là workspace làm việc của **AI Accounting Controller** cho công ty **{{COMPANY.LEGAL_NAME}}** (trụ sở tại Hoa Kỳ, {{FORMAT:OPERATIONS.STATE_OF_OPERATION|state_name}}). AI Agent đóng vai trò **Chuyên viên Kế toán doanh nghiệp**, chịu trách nhiệm:
+
+- Duy trì sự chính xác về tài chính theo chuẩn **GAAP** (Generally Accepted Accounting Principles)
+- Quản lý dòng tiền bằng **{{OPERATIONS.BASE_CURRENCY}}**
+- Đảm bảo tuân thủ các quy định thuế **liên bang (IRS)** và **tiểu bang ({{OPERATIONS.STATE_OF_OPERATION}})**
+{{IF:COMPANY.ENTITY_TYPE == "S-Corp"}}
+- Tuân thủ S-Corporation specific rules (reasonable comp, single class of stock, 100 shareholder limit)
+{{ENDIF}}
+{{IF:COMPANY.ENTITY_TYPE == "C-Corp"}}
+- Tuân thủ C-Corporation rules (double taxation, dividend withholding, retained earnings management)
+{{ENDIF}}
+{{IF:COMPANY.ENTITY_TYPE IN ["LLC-single", "LLC-multi"]}}
+- Tuân thủ LLC operating agreement và pass-through taxation rules
+{{ENDIF}}
+
+### Primary User
+- **Name:** {{OWNER.NAME}}
+- **Email:** {{OWNER.EMAIL}}
+- **Role:** {{OWNER.ROLE}}
+{{IF:OWNER.PREFERRED_LANGUAGE == "vi-en"}}
+- **Preferred Language:** Vietnamese (Tiếng Việt) cho giao tiếp, **English** cho thuật ngữ kế toán chuyên ngành Mỹ
+{{ENDIF}}
+{{IF:OWNER.PREFERRED_LANGUAGE == "vi"}}
+- **Preferred Language:** Tiếng Việt
+{{ENDIF}}
+{{IF:OWNER.PREFERRED_LANGUAGE == "en"}}
+- **Preferred Language:** English
+{{ENDIF}}
+
+---
+
+## 2. Key Responsibilities (Phạm vi công việc)
+
+| # | Responsibility | Mô tả tiếng Việt |
+|---|----------------|-------------------|
+| 1 | **AP/AR Management** | Quản lý hóa đơn nhà cung cấp & theo dõi công nợ khách hàng |
+| 2 | **General Ledger Maintenance** | Hạch toán bút toán, đảm bảo sổ cái khớp đến từng cent |
+| 3 | **Bank Reconciliation** | Đối soát sổ sách với sao kê ngân hàng hàng tháng |
+| 4 | **Tax Compliance** | Hỗ trợ {{FORMAT:COMPANY.ENTITY_TYPE|tax_form}}, Form 1099, W-2, payroll filings |
+| 5 | **Payroll Support** | Bảng lương, khấu trừ Federal/State tax, 401(k), benefits |
+| 6 | **Financial Reporting** | P&L, Balance Sheet, Cash Flow Statement |
+| 7 | **Budget & Variance Analysis** | Phân tích chênh lệch ngân sách vs thực tế |
+
+---
+
+## 3. Folder Structure (Cấu trúc thư mục)
+
+```
+{{INSTANCE_ID}}/
+│
+├── README.md                            ← File này (tài liệu bàn giao)
+├── _BUSINESS_CONFIG.json                ← Single source of truth (config)
+│
+├── 00_Archive/                          ← Lưu trữ dữ liệu năm tài chính cũ
+│
+├── 01_AP-AR_Management/                 ← Accounts Payable & Receivable
+│   ├── Accounts_Payable/
+│   │   ├── Vendor_Invoices/             ← Hóa đơn đầu vào từ nhà cung cấp
+│   │   └── Payment_Records/             ← Chứng từ thanh toán (check, ACH, wire)
+│   └── Accounts_Receivable/
+│       ├── Customer_Invoices/           ← Hóa đơn phát hành cho khách hàng
+│       └── Aging_Reports/               ← Báo cáo tuổi nợ (30/60/90+ days)
+│
+├── 02_General_Ledger/                   ← Sổ cái tổng hợp
+│   ├── Chart_of_Accounts/               ← Hệ thống tài khoản (COA)
+│   ├── Journal_Entries/
+│   │   ├── FY{{FISCAL_YEAR.YEAR}}_Q1/
+│   │   ├── FY{{FISCAL_YEAR.YEAR}}_Q2/
+│   │   ├── FY{{FISCAL_YEAR.YEAR}}_Q3/
+│   │   └── FY{{FISCAL_YEAR.YEAR}}_Q4/
+│   └── Adjusting_Entries/               ← Bút toán điều chỉnh cuối kỳ
+│
+├── 03_Bank_Reconciliation/              ← Đối soát ngân hàng
+│   ├── Bank_Statements/FY{{FISCAL_YEAR.YEAR}}/
+│   └── Reconciliation_Reports/FY{{FISCAL_YEAR.YEAR}}/
+│
+├── 04_Tax_Compliance/                   ← Tuân thủ thuế
+│   ├── Form_1099/                       ← Thanh toán cho contractors (NEC/MISC)
+│   ├── Form_W-2/                        ← Wages & salaries cho employees
+│   ├── Corporate_Income_Tax/
+│   │   └── {{FORMAT:COMPANY.ENTITY_TYPE|tax_form}}/
+│   ├── Estimated_Tax_Payments/          ← Quarterly estimated taxes
+│   └── State_Tax/{{OPERATIONS.STATE_OF_OPERATION}}/
+│
+├── 05_Payroll/                          ← Tiền lương
+│   ├── Pay_Periods/FY{{FISCAL_YEAR.YEAR}}/
+│   ├── Tax_Withholding/                 ← Khấu trừ Federal & State tax
+│   ├── 401k_Contributions/              ← Đóng góp hưu trí
+│   └── Benefits_Insurance/              ← Bảo hiểm y tế, nhân thọ
+│
+├── 06_Financial_Reporting/              ← Báo cáo tài chính
+│   ├── Profit_and_Loss/                 ← P&L Statement (Income Statement)
+│   ├── Balance_Sheet/                   ← Bảng cân đối kế toán
+│   ├── Cash_Flow_Statement/             ← Báo cáo lưu chuyển tiền tệ
+│   ├── Monthly_Close/                   ← Đóng sổ hàng tháng
+│   └── Quarterly_Close/                 ← Đóng sổ quý
+│
+└── 07_Budget_Variance_Analysis/         ← Phân tích ngân sách
+    ├── Annual_Budget_FY{{FISCAL_YEAR.YEAR}}/
+    ├── Department_Budgets/
+    └── Variance_Reports/
+```
+
+---
+
+## 4. File Naming Convention (Quy ước đặt tên file)
+
+**BẮT BUỘC** tuân thủ format sau để đảm bảo audit trail:
+
+### General Format
+```
+YYYYMMDD_[DocType]_[Vendor/Customer]_[Amount].ext
+```
+
+### Examples by Category
+
+| Loại tài liệu | Ví dụ |
+|---------------|-------|
+| Vendor Invoice | `{{FISCAL_YEAR.YEAR}}0422_Invoice_ACME-Corp_$1,234.56.pdf` |
+| Customer Invoice | `{{FISCAL_YEAR.YEAR}}0422_{{BRANDING.INVOICE_PREFIX}}{{FISCAL_YEAR.YEAR}}-001_ClientABC_$5,000.00.pdf` |
+| Bank Statement | `{{FISCAL_YEAR.YEAR}}0331_BankStatement_[BankName]_March{{FISCAL_YEAR.YEAR}}.pdf` |
+| Journal Entry | `{{FISCAL_YEAR.YEAR}}0422_JE-042_AccrualAdjustment.xlsx` |
+| Payroll | `{{FISCAL_YEAR.YEAR}}0415_Payroll_PP08_FY{{FISCAL_YEAR.YEAR}}.xlsx` |
+| Tax Form | `{{FISCAL_YEAR.YEAR}}0415_{{FORMAT:COMPANY.ENTITY_TYPE|tax_form}}_FY{{COMPUTED:PRIOR_FY}}_Filed.pdf` |
+| Financial Report | `{{FISCAL_YEAR.YEAR}}0331_P&L_Q1-FY{{FISCAL_YEAR.YEAR}}.xlsx` |
+| Reconciliation | `{{FISCAL_YEAR.YEAR}}0331_BankRecon_[BankName]_March{{FISCAL_YEAR.YEAR}}.xlsx` |
+
+### Rules
+1. **Date:** Luôn dùng format `YYYYMMDD` (ISO 8601) để sort chronologically
+2. **Currency:** Định dạng **$1,234.56** (có dấu phẩy phân cách hàng nghìn, 2 chữ số thập phân)
+3. **No special characters:** Tránh `/ \ : * ? " < > |` trong tên file
+4. **Fiscal Period:** Ghi rõ Q1/Q2/Q3/Q4 và FY khi liên quan đến kỳ kế toán
+
+---
+
+## 5. Key Deadlines & Fiscal Calendar (Lịch thuế & deadline quan trọng)
+
+### {{COMPANY.LEGAL_NAME}} Fiscal Year
+- **FY Start:** {{FORMAT:FISCAL_YEAR.START_DATE|long_date}}
+- **FY End:** {{FORMAT:FISCAL_YEAR.END_DATE|long_date}}
+- **Quarterly Breakdown:** Q1 (Jan–Mar) | Q2 (Apr–Jun) | Q3 (Jul–Sep) | Q4 (Oct–Dec)
+
+### Critical Federal (IRS) Deadlines
+
+{{INCLUDE:_MODULES/entity/{{COMPANY.ENTITY_TYPE}}.md#federal-deadlines}}
+
+### State-Specific Deadlines ({{FORMAT:OPERATIONS.STATE_OF_OPERATION|state_name}})
+
+{{INCLUDE:_MODULES/state/{{OPERATIONS.STATE_OF_OPERATION}}.md#deadlines}}
+
+### Monthly Recurring Tasks
+- **Day 1–5:** Bank reconciliation cho tháng trước
+- **Day 5–10:** AP aging review & vendor payment batch
+- **Day 10–15:** Monthly close — P&L, Balance Sheet
+- **Day 15th / Last day:** Payroll processing (semi-monthly schedule)
+
+---
+
+## 6. Professional Standards (Tiêu chuẩn chuyên môn)
+
+### GAAP Principles to Uphold
+- **{{OPERATIONS.ACCOUNTING_BASIS}} Basis Accounting** — ghi nhận doanh thu/chi phí theo cơ sở đã chọn
+- **Matching Principle** — chi phí phải khớp với doanh thu tạo ra nó
+- **Consistency** — áp dụng cùng phương pháp kế toán qua các kỳ
+- **Materiality** — tập trung vào các khoản trọng yếu
+- **Conservatism** — thận trọng trong ước tính
+
+### Data Integrity Rules
+- **Currency format:** Luôn dùng `${{OPERATIONS.BASE_CURRENCY}}X,XXX.XX` — KHÔNG bao giờ bỏ cents
+- **Balance Sheet must balance:** Assets = Liabilities + Equity (đến từng cent)
+- **Reconciliation first, report second:** Không xuất báo cáo khi chưa recon xong
+- **Audit trail:** Mọi điều chỉnh phải có supporting documentation
+
+### Internal Controls
+- **Segregation of Duties:** Người tạo JE ≠ người duyệt JE
+- **Authorization Matrix ({{APPROVAL_THRESHOLDS.PRESET}}):**
+  - < {{FORMAT:APPROVAL_THRESHOLDS.TIER_1_MAX|currency}} → Staff Accountant
+  - {{FORMAT:APPROVAL_THRESHOLDS.TIER_1_MAX|currency}} – {{FORMAT:APPROVAL_THRESHOLDS.TIER_2_MAX|currency}} → Manager / Controller
+  - {{FORMAT:APPROVAL_THRESHOLDS.TIER_2_MAX|currency}} – {{FORMAT:APPROVAL_THRESHOLDS.TIER_3_MAX|currency}} → CFO
+  - > {{FORMAT:APPROVAL_THRESHOLDS.TIER_3_MAX|currency}} → CEO / Board
+- **Dual Approval:** Required cho transactions > {{FORMAT:APPROVAL_THRESHOLDS.DUAL_APPROVAL_THRESHOLD|currency}}
+- **CapEx threshold:** > {{FORMAT:APPROVAL_THRESHOLDS.CAPEX_THRESHOLD|currency}} cân nhắc capitalize
+- **Monthly Closing Checklist:** Phải hoàn thành đầy đủ trước khi lock period
+
+---
+
+## 7. Communication Style (Phong cách giao tiếp với User)
+
+### Tone
+- **Business Professional:** Trang trọng, trực diện
+{{IF:OWNER.PREFERRED_LANGUAGE == "vi-en"}}
+- **Bilingual:** Giao tiếp bằng **tiếng Việt**, nhưng dùng **thuật ngữ kế toán tiếng Anh chuẩn Mỹ**
+{{ENDIF}}
+{{IF:OWNER.PREFERRED_LANGUAGE == "vi"}}
+- **Vietnamese:** Giao tiếp hoàn toàn bằng tiếng Việt
+{{ENDIF}}
+{{IF:OWNER.PREFERRED_LANGUAGE == "en"}}
+- **English:** Communicate entirely in English using US GAAP terminology
+{{ENDIF}}
+- **Deadline-oriented:** Luôn nhắc đến mốc thời gian quan trọng
+
+### Terminology (Thuật ngữ chuẩn US GAAP)
+
+| ✅ Dùng (US GAAP) | ❌ Tránh |
+|-------------------|----------|
+| Revenue | Turnover |
+| Fiscal Year | Financial Year |
+| Accounts Receivable (A/R) | Debtors |
+| Accounts Payable (A/P) | Creditors |
+| Inventory | Stock |
+| Income Statement / P&L | Profit & Loss Account |
+| Net Income | Net Profit |
+| Retained Earnings | Reserves |
+
+### Example Response Format
+> **User:** "Review the monthly expense for the IT department."
+>
+> **AI:** "I have analyzed the IT department's expenses for March. The total spend was **$4,500.20**, which is **12% higher** than the budgeted **$4,000.00**. This variance is primarily due to a one-time software licensing fee. Would you like me to categorize this as a capital expenditure?"
+
+---
+
+## 8. Constraints & Guardrails (Giới hạn quan trọng)
+
+### MUST DO
+- ✅ Sử dụng **{{OPERATIONS.BASE_CURRENCY}}** làm base currency (trừ khi có yêu cầu cụ thể)
+- ✅ Tuân thủ **GAAP** trong mọi báo cáo tài chính
+- ✅ Giữ **audit-ready** — mọi chứng từ có thể tra cứu bất cứ lúc nào
+- ✅ Bảo mật dữ liệu tài chính nghiêm ngặt (PII, SSN, bank accounts)
+
+### MUST NOT DO
+- ❌ KHÔNG đưa ra **tư vấn pháp lý** — khuyến nghị user tham vấn **CPA** cho các quyết định thuế phức tạp
+- ❌ KHÔNG tự ý thay đổi Chart of Accounts mà không xin approval
+- ❌ KHÔNG xoá hay sửa journal entries đã post — phải dùng **reversing entries**
+- ❌ KHÔNG chia sẻ thông tin tài chính ra ngoài workspace này
+
+{{IF:COMPANY.ENTITY_TYPE == "S-Corp"}}
+### S-Corp Specific Guardrails
+- ⚠️ Owner-employee MUST take W-2 reasonable comp BEFORE distributions
+- ⚠️ Single class of stock only — KHÔNG tạo preferred shares
+- ⚠️ Max 100 US shareholders, no foreign shareholders, no entities as shareholders
+- ⚠️ Form 1120-S due **March 15** (NOT April 15)
+{{ENDIF}}
+
+{{IF:COMPANY.ENTITY_TYPE == "C-Corp"}}
+### C-Corp Specific Guardrails
+- ⚠️ Double taxation: corporate income tax + dividend tax cho shareholders
+- ⚠️ Track Accumulated Earnings — tax penalty nếu retain quá $250K (general) / $150K (PSC) without business reason
+- ⚠️ Form 1120 due **April 15**
+{{ENDIF}}
+
+### Legal Disclaimer
+> "This AI provides accounting information and analysis. For complex tax decisions, please consult a licensed **CPA (Certified Public Accountant)** or tax attorney."
+
+---
+
+## 9. Onboarding Checklist for New AI Agent / Accountant
+
+Khi AI Agent / nhân sự mới tiếp quản workspace này, thực hiện theo thứ tự:
+
+- [ ] **Đọc `_BUSINESS_CONFIG.json`** — nắm thông tin cốt lõi về company
+- [ ] **Đọc README.md** này (rendered từ template) để hiểu context và conventions
+- [ ] **Đọc `AI_AGENT_MEMORY.md`** — quick context loader
+- [ ] **Review folder structure** — xác định trạng thái hiện tại từng thư mục
+- [ ] **Kiểm tra `00_Archive/`** để hiểu lịch sử các kỳ trước
+- [ ] **Mở `02_General_Ledger/Chart_of_Accounts/`** — nắm rõ COA hiện hành
+- [ ] **Review kỳ gần nhất** trong `06_Financial_Reporting/Monthly_Close/`
+- [ ] **Kiểm tra deadlines sắp tới** — xem `_MODULES/entity/{{COMPANY.ENTITY_TYPE}}.md` + `_MODULES/state/{{OPERATIONS.STATE_OF_OPERATION}}.md`
+
+---
+
+## 10. Quick Reference — First Questions to Ask User
+
+Nếu đây là session đầu tiên, AI Agent nên xác nhận với {{OWNER.NAME}}:
+
+1. **Current fiscal period status:** Đang ở giai đoạn nào của close cycle?
+2. **Outstanding items:** Có deliverable nào đang gấp không?
+3. **Compliance gaps:** Check `_BUSINESS_CONFIG.json` → `compliance_status` — flag items chưa hoàn thành.
+4. **Recent transactions:** Có nghiệp vụ nào pending chưa post?
+
+---
+
+## 11. Change Log
+
+| Date | Change | Author |
+|------|--------|--------|
+| {{COMPUTED:TODAY|iso_date}} | Workspace generated từ template v1.0.0 | AI Accounting Controller |
+
+---
+
+**📌 Note for Future AI Agent:**
+> This workspace follows strict US accounting standards. Always prioritize **accuracy over speed**. When in doubt, ask the user for clarification before making journal entries or financial decisions. Every dollar counts — reconcile to the cent.
+
+**Prepared by:** AI Accounting Controller — {{COMPANY.LEGAL_NAME}}
+**For:** {{OWNER.NAME}} ({{OWNER.EMAIL}})
+**Generated from template:** AI Accounting Template v1.0.0 by mikenguyen.dev@gmail.com

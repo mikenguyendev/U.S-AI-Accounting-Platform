@@ -1,0 +1,9 @@
+JE_Number,Date,Account_Number,Account_Name,Description,Debit,Credit,Reference,Posted_By,Approved_By,Status
+JE-2026-001,2026-04-15,6010,Salaries and Wages,April 15 Payroll - Gross Wages,5000.00,,Payroll PP07,J.Doe,M.Smith,Posted
+JE-2026-001,2026-04-15,2310,Federal Income Tax Withheld,April 15 Payroll - Fed WH,,750.00,Payroll PP07,J.Doe,M.Smith,Posted
+JE-2026-001,2026-04-15,2320,FICA Withheld (Employee),April 15 Payroll - FICA EE,,382.50,Payroll PP07,J.Doe,M.Smith,Posted
+JE-2026-001,2026-04-15,2340,State Income Tax Withheld,April 15 Payroll - State WH,,200.00,Payroll PP07,J.Doe,M.Smith,Posted
+JE-2026-001,2026-04-15,1010,Cash - Operating Checking,April 15 Payroll - Net Pay,,3667.50,Payroll PP07,J.Doe,M.Smith,Posted
+JE-2026-002,2026-04-22,6310,Software and Subscriptions,Adobe Creative Cloud annual subscription,599.88,,INV-ACC-12345,J.Doe,,Pending
+JE-2026-002,2026-04-22,2100,Credit Card Payable,Adobe Creative Cloud annual subscription,,599.88,INV-ACC-12345,J.Doe,,Pending
+,,,TOTALS:,,,,,,,
